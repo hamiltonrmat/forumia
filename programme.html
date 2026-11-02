@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Programme · Forum IA 2026</title>
+  <meta name="description" content="Le déroulé de la matinée du Forum IA de la Collectivité européenne d’Alsace.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="programme" data-root="">
+  <header id="site-header"></header>
+
+  <main>
+    <div class="wrap page-head">
+      <p class="overline" id="prog-date"></p>
+      <h1>Le programme</h1>
+      <p class="lede">Cliquez sur une séquence pour en voir le détail. Choisissez votre parcours initial : il détermine uniquement votre salle à 10h15. Dès 11h, vous circulez librement entre les stands.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="wrap toolbar-inner">
+        <span class="toolbar-label">Mon parcours initial</span>
+        <div class="chips" id="chips" role="group" aria-label="Choisir mon parcours initial"></div>
+        <span class="spacer"></span>
+        <button class="link-btn" id="expand-all" type="button">Tout déplier</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <p class="toolbar-note" id="focus-note" aria-live="polite" style="margin-top:1.25rem"></p>
+      <ol class="timeline" id="timeline"></ol>
+
+      <h2 class="overline" style="margin-top:2rem">Les lieux</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/programme.js"></script>
+</body>
+</html>

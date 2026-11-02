@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forum IA 2026</title>
+  <meta name="description" content="Forum IA de la Collectivité européenne d’Alsace : une matinée pour comprendre, explorer et s’inspirer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="accueil" data-root="">
+  <header id="site-header"></header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <svg class="hero-ornament" viewBox="0 0 200 200" aria-hidden="true">
+          <g fill="none" stroke-width=".8">
+            <circle cx="100" cy="78" r="52" stroke="var(--pA)"/>
+            <circle cx="80" cy="113" r="52" stroke="var(--pB)"/>
+            <circle cx="120" cy="113" r="52" stroke="var(--pC)"/>
+          </g>
+          <circle cx="100" cy="101" r="3" fill="var(--accent)"/>
+        </svg>
+        <div class="hero-org reveal">
+          <img class="logo-cea" src="assets/img/logo-cea.png" alt="Alsace, Collectivité européenne" width="2000" height="649">
+          <p class="overline" id="hero-org"></p>
+        </div>
+        <h1 class="hero-title reveal" id="hero-title"></h1>
+        <p class="lede reveal" id="hero-lede"></p>
+        <dl class="hero-meta reveal" id="hero-meta"></dl>
+        <div class="hero-actions reveal">
+          <a class="btn" href="programme.html">Découvrir le programme <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href="#parcours">Choisir mon parcours initial</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="matinee">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <p class="overline">La matinée</p>
+            <h2>En un coup d’œil</h2>
+          </div>
+          <p>Une ouverture commune pour poser les bases, trois parcours au choix selon votre rapport à l’IA, l’Agora de l’IA pour échanger autour des stands, puis une clôture tous ensemble.</p>
+        </div>
+        <ol class="glance reveal" id="glance"></ol>
+      </div>
+    </section>
+
+    <section class="section" id="parcours">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <p class="overline">10h15 – 11h · parcours initial</p>
+            <h2>Trois parcours, un forum</h2>
+          </div>
+          <p>Chacun vient avec son niveau et ses attentes. Votre parcours initial détermine seulement votre salle de 10h15 à 11h ; ensuite, l’Agora de l’IA vous laisse circuler à votre guise entre les stands.</p>
+        </div>
+        <div class="paths" id="paths"></div>
+      </div>
+    </section>
+
+    <section class="section" id="infos">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <p class="overline">Infos pratiques</p>
+            <h2>Avant de venir</h2>
+          </div>
+          <p>Toutes les informations utiles pour profiter pleinement de la matinée.</p>
+        </div>
+        <div class="infos reveal" id="infos-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/accueil.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accueil café & enregistrement · Forum IA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="programme" data-root="../" data-seq="accueil">
+  <header id="site-header"></header>
+
+  <main class="wrap">
+    <!-- En-tête généré depuis assets/js/data.js (horaires, lieu, intervenants) -->
+    <div id="seq-head"></div>
+
+    <!-- ============ INFORMATIONS D'ENREGISTREMENT ============
+         Page volontairement courte. Les passages surlignés (class="todo") sont à compléter. -->
+    <section class="arrival">
+      <h2 class="overline">Votre arrivée</h2>
+      <ol class="arrival-steps">
+        <li>
+          <span class="arrival-num">1</span>
+          <h3>Présentez-vous à l’accueil</h3>
+          <p>Dans le hall d’entrée, dès 8h30.</p>
+        </li>
+        <li>
+          <span class="arrival-num">2</span>
+          <h3>Enregistrez-vous</h3>
+          <p>Émargement, remise du badge et de la Charte IA : modalités à préciser.</p>
+        </li>
+        <li>
+          <span class="arrival-num">3</span>
+          <h3>Un café, puis la plénière</h3>
+          <p>Rejoignez la salle plénière pour le lancement à 9h.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="signup">
+      <div>
+        <p class="overline">Inscription</p>
+        <h2>Réservez votre place</h2>
+        <p>Inscrivez-vous en ligne avant le forum.</p>
+      </div>
+      <!-- LIEN D'INSCRIPTION : remplacer href="#" par l'adresse du formulaire -->
+      <a class="btn" href="#" target="_blank" rel="noopener">S’inscrire <span class="arrow" aria-hidden="true">→</span></a>
+    </section>
+
+    <nav class="seq-nav" id="seq-nav" aria-label="Séquences"></nav>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script src="../assets/js/sequence.js"></script>
+</body>
+</html>

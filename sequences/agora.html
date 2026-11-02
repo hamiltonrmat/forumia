@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>L’Agora de l’IA · Forum IA 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="agora" data-root="../" data-seq="agora">
+  <header id="site-header"></header>
+
+  <main class="wrap">
+    <!-- En-tête généré depuis assets/js/data.js (horaires, lieu) -->
+    <div id="seq-head"></div>
+
+    <!-- Les stands (cartes + fenêtre de détail) sont générés depuis assets/js/data.js :
+         titre, niveau, animateur et description de chaque stand -->
+    <section class="stands-section">
+      <div class="stands-head">
+        <h2 class="overline">Les stands</h2>
+        <p class="muted">Cliquez sur un stand pour en voir le détail.</p>
+      </div>
+      <div class="stand-grid" id="stands"></div>
+    </section>
+
+    <!-- ============ CONTENU À RÉDIGER ============
+         Les passages surlignés (class="todo") sont à compléter.
+         Supprimez simplement class="todo" une fois le texte rédigé. -->
+    <article class="prose libre-prose">
+
+      <section>
+        <h2><span class="num">01</span>Objectif général</h2>
+        <p>Laisser les participants circuler librement, échanger autour d’un café et approfondir sur les stands de démonstration et les ateliers. Le parcours choisi à 10h15 n’engage à rien : chacun va où il le souhaite.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">02</span>Principe</h2>
+        <p class="todo">Ateliers ou démonstrations en continu ? Rotation ?</p>
+      </section>
+
+      <section>
+        <h2><span class="num">03</span>Plan du hall</h2>
+        <p class="todo">Implantation des 7 stands dans le hall d’entrée.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">04</span>Couleurs des stands</h2>
+        <p>Chaque stand reprend la couleur du niveau auquel il s’adresse en priorité. Tous restent ouverts à tous.</p>
+        <div class="level-legend" id="stands-legend"></div>
+      </section>
+    </article>
+
+    <nav class="seq-nav" id="seq-nav" aria-label="Séquences"></nav>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script src="../assets/js/sequence.js"></script>
+</body>
+</html>
