@@ -529,6 +529,24 @@ p.todo, li.todo, div.todo { display: block; padding: .75rem 1rem; }
 [data-p="B"], [data-parcours="B"] { --c: var(--pB); --c-soft: var(--pB-soft); }
 [data-p="C"], [data-parcours="C"] { --c: var(--pC); --c-soft: var(--pC-soft); }
 
+/* ---------- Aperçu des stands (page d'accueil) ---------- */
+.stands-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
+.stand-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; }
+.stand-card .stand-num { font-family: var(--serif); font-style: italic; font-size: 1.75rem; line-height: 1; color: var(--c, var(--ink-2)); }
+.stand-card .stand-level { display: inline-flex; align-items: center; gap: .35rem; font-size: .72rem; font-weight: 500; color: var(--c, var(--ink-2)); white-space: nowrap; margin-top: .25rem; }
+.stand-card .stand-level .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--ink-2)); }
+.stand-card h3 { font-size: 1rem; margin: .75rem 0 .25rem; }
+.stand-card p { font-size: .9rem; color: var(--ink-2); margin: 0; }
+.stand-card p.muted { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+
+/* ---------- Plan interactif (page d'accueil) ---------- */
+.plan-embed { margin-top: 1.5rem; }
+.plan-embed iframe { width: 100%; height: 500px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+
+@media (max-width: 760px) {
+  .plan-embed iframe { height: 350px; }
+}
+
 /* ---------- Animation ---------- */
 .reveal { opacity: 0; transform: translateY(14px); transition: opacity .8s ease, transform .8s ease; }
 .reveal.is-visible { opacity: 1; transform: none; }

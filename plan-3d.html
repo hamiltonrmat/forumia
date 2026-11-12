@@ -1,0 +1,1504 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>Plan 3D Forum IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Mise en page : panneau d'exploration (espaces, programme) à gauche, maquette axonométrique à droite ; sur téléphone la maquette passe au-dessus */
+:root{
+  --bg:#E8ECF0;
+  --surface:#FFFFFF;
+  --surface-2:#F2F4F7;
+  --ink:#131A23;
+  --muted:#566273;
+  --line:#D5DBE2;
+  --focus:#2C5AD6;
+  --map-bg:#E3E8ED;
+  --map-ground:#D8DEE4;
+  --map-grid:#CAD1D9;
+  --map-slab:#F9FAFB;
+  --map-wall:#B7C0CB;
+  --map-block:#C8CFD8;
+  --map-pillar:#A1ACB8;
+  --map-edge:#7C8896;
+  --map-glass:#A6CBEB;
+  --map-screen:#222B36;
+  --map-counter:#EEF1F4;
+  --map-path:#131A23;
+  --map-path-gap:#FFFFFF;
+  --z-commun:#3A72C2;
+  --z-a:#D6457A;
+  --z-b:#D9A514;
+  --z-c:#2D925E;
+  --z-x:#8C97A6;
+  --font-display:"Space Grotesk","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1116; --surface:#151B22; --surface-2:#1B232C; --ink:#E7ECF1; --muted:#9BA7B5; --line:#29323D; --focus:#86A6FF;
+    --map-bg:#10161C; --map-ground:#141B22; --map-grid:#1F2831; --map-slab:#212B36; --map-wall:#3F4C5C; --map-block:#2F3A47;
+    --map-pillar:#516070; --map-edge:#6F7F91; --map-glass:#3D6D96; --map-screen:#0A0E13; --map-counter:#3B4756;
+    --map-path:#F4F7FA; --map-path-gap:#212B36;
+    --z-commun:#699CE9; --z-a:#EC6E9B; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1116; --surface:#151B22; --surface-2:#1B232C; --ink:#E7ECF1; --muted:#9BA7B5; --line:#29323D; --focus:#86A6FF;
+  --map-bg:#10161C; --map-ground:#141B22; --map-grid:#1F2831; --map-slab:#212B36; --map-wall:#3F4C5C; --map-block:#2F3A47;
+  --map-pillar:#516070; --map-edge:#6F7F91; --map-glass:#3D6D96; --map-screen:#0A0E13; --map-counter:#3B4756;
+  --map-path:#F4F7FA; --map-path-gap:#212B36;
+  --z-commun:#699CE9; --z-a:#EC6E9B; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
+  color-scheme:dark;
+}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.app{
+  height:100%;
+  display:grid;
+  grid-template-columns:minmax(280px,360px) minmax(0,1fr);
+  gap:16px;
+  padding-block:16px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Panneau ---------- */
+.panel{min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.panel-head{padding:20px 20px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.panel-head h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+.event-meta{margin:0;color:var(--muted);font-size:14px}
+
+.tabs{display:flex;gap:4px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
+.tab{appearance:none;background:none;border:0;border-bottom:2px solid transparent;padding:8px 10px 10px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab:hover{color:var(--ink)}
+
+.panel-body{flex:1;min-height:0;overflow:auto;padding:12px 12px 20px}
+.notice{margin:4px 8px 12px;font-size:12.5px;color:var(--muted)}
+
+.zone-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.zone-btn{appearance:none;width:100%;display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:12px;text-align:left;background:none;border:0;border-radius:10px;padding:10px 10px;cursor:pointer}
+.zone-btn:hover,.zone-btn.is-hover{background:var(--surface-2)}
+.zone-btn[aria-current="true"]{background:color-mix(in srgb, var(--z) 14%, var(--surface))}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--z);box-shadow:0 0 0 2px color-mix(in srgb, var(--z) 25%, transparent)}
+.zone-txt{min-width:0;display:flex;flex-direction:column}
+.zone-name{font-weight:600}
+.zone-sub{font-size:13px;color:var(--muted)}
+.zone-count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.group-label{margin:14px 10px 4px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.group-label:first-child{margin-top:4px}
+
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:4px 6px 12px}
+.chip{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.chip .dot{width:9px;height:9px;box-shadow:none}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+
+.sessions{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.session{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;padding:11px 8px;border-top:1px solid var(--line)}
+.session:first-child{border-top:0}
+.s-time{font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px;padding-top:1px}
+.s-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.s-title{font-weight:600}
+.s-who{font-size:13px;color:var(--muted)}
+.s-where{appearance:none;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;margin-top:3px;border:0;background:color-mix(in srgb, var(--z) 13%, var(--surface));border-radius:999px;padding:3px 9px 3px 7px;font-size:12px;font-weight:600;cursor:pointer}
+.s-where .dot{width:8px;height:8px;box-shadow:none}
+
+/* Aide au choix du parcours */
+.choose{margin:4px 2px 6px;border:1px solid var(--line);border-radius:12px;padding:12px 8px 6px;display:flex;flex-direction:column;gap:2px}
+.choose-title{margin:0 6px 4px;font-family:var(--font-display);font-size:16px;font-weight:700}
+.choose-row{appearance:none;width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) 16px;gap:10px;align-items:center;background:none;border:0;border-radius:8px;padding:7px 6px;text-align:left;cursor:pointer}
+.choose-row:hover{background:var(--surface-2)}
+.choose-row .dot{width:11px;height:11px;box-shadow:none}
+.choose-txt{min-width:0;display:flex;flex-direction:column}
+.choose-if{font-size:12.5px;color:var(--muted)}
+.choose-then{font-weight:600;font-size:14px}
+.choose-go{color:var(--muted);display:grid}
+.choose-go svg{width:16px;height:16px}
+
+/* Programme de la journée */
+.slots{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.slot{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;padding:13px 8px;border-top:1px solid var(--line)}
+.slot:first-child{border-top:0}
+.slot-time{font-variant-numeric:tabular-nums;font-weight:700;font-size:13.5px;padding-top:1px}
+.slot-body{min-width:0;display:flex;flex-direction:column;gap:7px}
+.slot-title{font-weight:700;font-size:15px;line-height:1.3}
+.slot.is-pause{padding-block:8px}
+.slot.is-pause .slot-time,.slot.is-pause .slot-title{font-weight:500;font-size:13px;color:var(--muted)}
+.sub-text{font-size:13.5px;color:var(--muted)}
+.sub-items{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.sub-item{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px}
+.sub-dur{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.sub-body{min-width:0;display:flex;flex-direction:column;gap:1px}
+.sub-title{font-weight:600;font-size:14px}
+.track{appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.track:hover{background:var(--surface-2)}
+.track-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted)}
+.track-head .dot{width:9px;height:9px;box-shadow:none}
+.track-title{font-weight:700;font-size:14.5px}
+.track-where{font-size:13px;color:var(--muted)}
+
+/* Détail d'un espace */
+.back{appearance:none;display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:6px 8px;border-radius:8px;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer}
+.back:hover{color:var(--ink);background:var(--surface-2)}
+.detail{padding:6px 8px 0;display:flex;flex-direction:column;gap:14px}
+.detail-head{display:flex;flex-direction:column;gap:8px}
+.detail h2:focus{outline:none}
+.detail h2{margin:0;font-family:var(--font-display);font-size:26px;line-height:1.1;font-weight:700;text-wrap:balance}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;background:color-mix(in srgb, var(--z) 15%, var(--surface))}
+.tag .dot{width:9px;height:9px;box-shadow:none}
+.detail p{margin:0;max-width:62ch}
+.tag.is-plain{background:var(--surface-2)}
+.block{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.block-title{font-family:var(--font-display);font-weight:700;font-size:18px;line-height:1.25}
+.muted{color:var(--muted);font-size:14px}
+.points{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.quote{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb, var(--z) 13%, var(--surface));font-size:14px}
+.quote-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.team{list-style:none;margin:0;padding:0;font-size:13.5px;display:flex;flex-direction:column;gap:2px}
+.cr{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+.cr svg{width:16px;height:16px;flex:none}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{appearance:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--surface-2)}
+.btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn svg{width:16px;height:16px;flex:none}
+.detail h3{margin:6px 0 0;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stand-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stand{border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+.stand b{font-variant-numeric:tabular-nums}
+.stand-top{display:flex;align-items:center;gap:7px}
+.stand-top .dot{width:9px;height:9px;box-shadow:none}
+.stand span{font-size:13px;color:var(--muted)}
+
+/* ---------- Maquette ---------- */
+.map{position:relative;min-height:0;min-width:0;border-radius:14px;overflow:hidden;background:var(--map-bg);border:1px solid var(--line)}
+.map canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.map canvas.is-dragging{cursor:grabbing}
+.map canvas.is-pointing{cursor:pointer}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+
+.pin{position:absolute;left:0;top:0;pointer-events:auto;appearance:none;border:0;padding:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;will-change:transform}
+.pin-card{display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--ink);border:1px solid color-mix(in srgb, var(--z) 45%, var(--line));border-radius:10px;padding:5px 10px 5px 8px;box-shadow:0 2px 10px rgba(10,20,30,.12);white-space:nowrap;transition:transform .15s ease, opacity .2s ease}
+.pin-card .dot{width:10px;height:10px;box-shadow:none}
+.pin-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.pin-name{font-weight:700;font-size:13px}
+.pin-sub{font-size:11.5px;color:var(--muted);font-weight:500}
+.pin-stem{width:2px;height:12px;background:color-mix(in srgb, var(--z) 70%, var(--ink))}
+.pin:hover .pin-card,.pin.is-hover .pin-card{transform:translateY(-2px)}
+.pin.is-active .pin-card{border:2px solid var(--z);box-shadow:0 0 0 4px color-mix(in srgb, var(--z) 28%, transparent),0 4px 14px rgba(10,20,30,.18);transform:translateY(-2px)}
+.pin.is-active .dot{width:12px;height:12px}
+.pin.is-dim{opacity:.5}
+.pin[data-side="down"]{flex-direction:column-reverse}
+.pin[data-side="left"] .pin-stem,.pin[data-side="right"] .pin-stem{display:none}
+.badge{position:absolute;left:0;top:0;pointer-events:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;font-size:11.5px;font-weight:700;line-height:1;background:var(--surface);color:var(--ink);border:2px solid var(--z);font-variant-numeric:tabular-nums;box-shadow:0 1px 4px rgba(10,20,30,.16)}
+.pin.is-far .pin-sub{display:none}
+
+.tag-map{position:absolute;left:0;top:0;pointer-events:none;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.tag-map.is-entry{display:flex;align-items:center;gap:6px;color:var(--surface);background:var(--ink);border-radius:999px;padding:4px 10px 4px 8px;letter-spacing:.06em}
+.tag-map.is-entry svg{width:13px;height:13px}
+
+.map-tools{position:absolute;z-index:2;top:12px;right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;box-shadow:0 2px 8px rgba(10,20,30,.08)}
+.seg button{appearance:none;border:0;background:none;border-radius:7px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.tool-col{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(10,20,30,.08)}
+.tool-col button{appearance:none;border:0;background:none;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.tool-col button+button{border-top:1px solid var(--line)}
+.tool-col button:hover{background:var(--surface-2)}
+.tool-col svg{width:18px;height:18px}
+
+.map-foot{position:absolute;z-index:2;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px;pointer-events:none}
+.hint,.legend{background:color-mix(in srgb, var(--surface) 88%, transparent);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:12px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;background:var(--map-block);border:1px solid var(--map-edge)}
+.sw-path{width:18px;height:4px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--map-path) 0 6px,transparent 6px 10px)}
+.fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+@media (max-width: 760px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1.1fr) minmax(0,1fr);gap:12px;padding-block:12px}
+  .map{order:-1}
+  .panel-head{padding:14px 16px 10px}
+  .panel-head h1{font-size:22px}
+  .hint{display:none}
+  .seg button{padding:5px 8px;font-size:12px}
+  .tool-col button{width:36px;height:36px}
+}
+@media (max-width: 480px){
+  .legend{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .pin-card{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel" aria-label="Espaces et programme du forum">
+    <header class="panel-head">
+      <span class="eyebrow">Plan interactif</span>
+      <h1 id="ev-name">Forum IA</h1>
+      <p class="event-meta" id="ev-meta"></p>
+    </header>
+    <div class="tabs" role="tablist" aria-label="Affichage du panneau">
+      <button type="button" class="tab" role="tab" id="tab-espaces" aria-controls="view-espaces" aria-selected="true">Espaces</button>
+      <button type="button" class="tab" role="tab" id="tab-programme" aria-controls="view-programme" aria-selected="false" tabindex="-1">Programme</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <section id="view-espaces" role="tabpanel" aria-labelledby="tab-espaces"></section>
+      <section id="view-programme" role="tabpanel" aria-labelledby="tab-programme" hidden></section>
+      <section id="view-detail" hidden></section>
+    </div>
+  </aside>
+
+  <main class="map" id="map">
+    <canvas id="scene" tabindex="0" role="img" aria-label="Maquette 3D du site du forum. Faites glisser pour pivoter la vue. Au clavier : flèches pour pivoter, plus et moins pour zoomer ; la liste des espaces permet aussi de naviguer."></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="map-tools">
+      <div class="seg" role="group" aria-label="Type de vue">
+        <button type="button" id="v3d" aria-pressed="true">3D</button>
+        <button type="button" id="vtop" aria-pressed="false">Dessus</button>
+      </div>
+      <div class="tool-col">
+        <button type="button" id="zin" aria-label="Zoomer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button type="button" id="zout" aria-label="Dézoomer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <button type="button" id="home" aria-label="Revenir à la vue d'ensemble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+    </div>
+    <div class="map-foot">
+      <div class="hint" id="hint">Glisser : pivoter · Clic droit ou Maj : déplacer · Molette : zoomer</div>
+      <div class="legend"><span><i class="sw"></i>Hors forum</span><span><i class="sw-path"></i>Itinéraire</span></div>
+    </div>
+    <p class="sr-only" id="live" aria-live="polite"></p>
+  </main>
+</div>
+
+<script>
+document.documentElement.lang = 'fr';
+(function () {
+'use strict';
+
+/* =====================================================================
+   1. CONTENU DU FORUM — programme transmis ; les crochets restent à compléter
+   ===================================================================== */
+const EVENEMENT = { nom: 'ForumIA CeA 2026', date: 'Mardi 15 décembre 2026', lieu: 'Hôtel d’Alsace, Strasbourg' };
+
+// Les trois niveaux du forum (code couleur du programme)
+const NIVEAUX = {
+  commun: { nom: 'Commun à tous', couleur: '--z-commun' },
+  a: { nom: 'Je découvre', parcours: 'Parcours A', si: 'Pas d’IA', couleur: '--z-a', zone: 'parcours-a' },
+  b: { nom: 'Je m’inspire', parcours: 'Parcours B', si: 'Le présent : on le fait déjà', couleur: '--z-b', zone: 'parcours-b' },
+  c: { nom: 'Je me projette', parcours: 'Parcours C', si: 'Le futur : vers où aller', couleur: '--z-c', zone: 'parcours-c' },
+  x: { nom: 'Niveau à préciser', couleur: '--z-x' }
+};
+
+// Espaces cliquables sur la maquette
+const ZONES = [
+  { id: 'pleniere', nom: 'Salle plénière', sous: 'Ouverture et clôture', groupe: 'Commun à tous', niveau: 'commun' },
+  { id: 'accueil', nom: 'Accueil', sous: 'Enregistrement', groupe: 'Commun à tous', niveau: 'commun' },
+  { id: 'cafe', nom: 'Espace café', sous: 'Entre le parcours A et la plénière', pin: 'Espace café', groupe: 'Commun à tous', niveau: 'commun' },
+  { id: 'robot', nom: 'Robot d’accueil', sous: 'Près de l’entrée', groupe: 'Commun à tous', niveau: 'commun', minor: true,
+    description: '[Présentation du robot d’accueil à compléter]' },
+  { id: 'parcours-a', nom: 'Parcours A', sous: 'Salle 1006/1007', groupe: 'Parcours au choix · 10h10–11h', niveau: 'a', pinSous: true },
+  { id: 'parcours-b', nom: 'Parcours B', sous: 'Salle 1005', groupe: 'Parcours au choix · 10h10–11h', niveau: 'b', pinSous: true },
+  { id: 'parcours-c', nom: 'Parcours C', sous: 'Espace écran du hall', groupe: 'Parcours au choix · 10h10–11h', niveau: 'c', pinSous: true },
+  { id: 'agora-piliers', nom: 'Agora de l’IA', sous: 'Stands 1 à 6, le long des piliers', pin: 'Stands 1 à 6', pinSub: 'Agora de l’IA',
+    groupe: 'Agora de l’IA · 11h–12h', niveau: 'commun', pinSous: true,
+    stands: [
+      { n: '1', niveau: 'a', theme: '[Thème à préciser]' }, { n: '2', niveau: 'a', theme: '[Thème à préciser]' },
+      { n: '3', niveau: 'b', theme: '[Thème à préciser]' }, { n: '4', niveau: 'b', theme: '[Thème à préciser]' },
+      { n: '5', niveau: 'b', theme: '[Thème à préciser]' }, { n: '6', niveau: 'c', theme: '[Thème à préciser]' }
+    ] },
+  { id: 'agora-ecran', nom: 'Agora de l’IA', sous: 'Stands 7 à 10, près de l’espace écran', pin: 'Stands 7 à 10', pinSub: 'Agora de l’IA',
+    groupe: 'Agora de l’IA · 11h–12h', niveau: 'commun', pinSous: true,
+    stands: [
+      { n: '7', niveau: 'c', theme: '[Thème à préciser]' }, { n: '8', niveau: 'x', theme: '[Thème à préciser]' },
+      { n: '9', niveau: 'x', theme: '[Thème à préciser]' }, { n: '10', niveau: 'x', theme: '[Thème à préciser]' }
+    ] }
+];
+
+// Déroulé de la journée (programme du forum)
+const PROGRAMME = [
+  { debut: '08:30', fin: '09:00', niveau: 'commun', titre: 'Accueil café et enregistrement', lieu: 'Hall d’entrée', zones: ['accueil', 'cafe'] },
+  { debut: '09:00', fin: '10:00', niveau: 'commun', titre: 'Ouverture', lieu: 'Salle plénière', zones: ['pleniere'],
+    items: [
+      { duree: '5 min', titre: 'Mot de bienvenue', texte: 'L’ambition de la CeA en termes d’IA : proximité, efficacité et simplicité.', qui: 'Gabriel GALLAND et un élu' },
+      { duree: '50 min', titre: 'IA : de quoi parle-t-on ?', texte: 'Le délégué à l’IA de la CeA interroge un expert reconnu du sujet.', qui: 'Hamilton DE ARAUJO et Germain FORESTIER (UHA)' },
+      { duree: '5 min', titre: 'Déroulé de la journée', qui: 'Hamilton DE ARAUJO' }
+    ] },
+  { debut: '10:00', fin: '10:10', pause: true, titre: 'Changement de salle' },
+  { debut: '10:10', fin: '11:00', niveau: 'a', titre: 'Le SAV de l’IA', lieu: 'Salle 1006/1007', zones: ['parcours-a'],
+    texte: 'Découvrir et comprendre les principaux sujets liés à l’utilisation de l’IA générative.',
+    format: 'Trois situations au format scène, débrief et apport théorique, suivies d’une conclusion participative avec le public.',
+    public: 'Je suis débutant en IA et j’ai envie de l’explorer davantage.',
+    equipe: ['Animation : Pierre GRAEF', 'IA : Emilie D.', 'SAV : Benoit F.'], cr: true },
+  { debut: '10:10', fin: '11:00', niveau: 'b', titre: 'Table ronde : l’IA dans la CeA', lieu: 'Salle 1005', zones: ['parcours-b'],
+    points: [
+      'Un agent à l’aise avec l’IA générative pour ses tâches quotidiennes (licences Copilot)',
+      'Le projet OCR Solidarités',
+      'Une IA a produit presque seule une de nos applications (DSIN)'
+    ],
+    public: 'Je connais l’IA, j’ai envie de l’intégrer dans mon métier, mais j’ai besoin de voir des cas pratiques et des témoignages concrets existant dans la Collectivité.',
+    equipe: ['Médiation : Hamilton DE ARAUJO', 'Intervenants : [Intervenant 1], Lucas DELAGREE, [Intervenant 3]'], cr: true },
+  { debut: '10:10', fin: '11:00', niveau: 'c', titre: 'L’émission du futur', lieu: 'Espace écran, dans le hall', zones: ['parcours-c'],
+    texte: 'Trois visions du service public alsacien de 2030.',
+    points: ['Simuler : voir avant d’agir', 'Anticiper : agir avant que le problème n’arrive', 'Augmenter : des agents dotés de nouvelles capacités'],
+    public: 'J’ai confiance dans l’IA, je veux me projeter et exploiter de nouvelles possibilités.',
+    equipe: ['Médiation : Gabriel GALLAND ou Stéphanie MENIGOZ'] },
+  { debut: '11:00', fin: '12:00', niveau: 'commun', titre: 'L’Agora de l’IA', lieu: 'Hall d’entrée', zones: ['agora-piliers', 'agora-ecran', 'cafe'],
+    texte: 'Séquence libre dans le hall, indépendante du parcours suivi auparavant : ateliers, démonstrations et échanges autour d’un café.' },
+  { debut: '12:00', fin: '12:30', niveau: 'commun', titre: 'Clôture', lieu: 'Salle plénière ou hall (à confirmer)', zones: ['pleniere'],
+    items: [
+      { titre: 'Adoptez l’IA dans votre quotidien', qui: 'Hamilton DE ARAUJO' },
+      { titre: 'Mot de fin : ambition et prochaines actions en termes d’IA', qui: 'Gabriel GALLAND' }
+    ] }
+];
+for (const z of ZONES) z.couleur = NIVEAUX[z.niveau].couleur;
+
+/* =====================================================================
+   2. GÉOMÉTRIE — repère du plan en mètres (x vers l'est, y vers le sud)
+   Contours relevés sur le plan d'évacuation, redressé ; échelle approchée.
+   ===================================================================== */
+const U = [0.7314, 0.6820];          // axe des rangées de poteaux
+const V = [-U[1], U[0]];
+const FACADE = [0.822, -0.570];      // axe de la façade d'entrée
+const FACADE_N = [0.570, 0.822];     // vers l'intérieur du hall
+const ARC = { cx: 53.2, cy: 33.45, r: 38.2 };   // façade courbe sud
+
+function arcPts(cx, cy, r, a0, a1, step) {
+  const out = []; const n = Math.max(1, Math.round(Math.abs(a1 - a0) / (step || 2)));
+  for (let i = 0; i <= n; i++) {
+    const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180;
+    out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+  }
+  return out;
+}
+function rectPts(c, a, b, u) {
+  u = u || U; const v = [-u[1], u[0]];
+  const h = a / 2, k = b / 2;
+  return [
+    [c[0] - h * u[0] - k * v[0], c[1] - h * u[1] - k * v[1]],
+    [c[0] + h * u[0] - k * v[0], c[1] + h * u[1] - k * v[1]],
+    [c[0] + h * u[0] + k * v[0], c[1] + h * u[1] + k * v[1]],
+    [c[0] - h * u[0] + k * v[0], c[1] - h * u[1] + k * v[1]]
+  ];
+}
+function sectorPts(r0, r1, a0, a1) {
+  return arcPts(ARC.cx, ARC.cy, r1, a0, a1, 2).concat(arcPts(ARC.cx, ARC.cy, r0, a1, a0, 2));
+}
+function polar(r, a) { a = a * Math.PI / 180; return [ARC.cx + r * Math.cos(a), ARC.cy + r * Math.sin(a)]; }
+function circlePts(c, r, n) { const o = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; o.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); } return o; }
+
+const OUTLINE = [
+  [14.62, 0.27], [23.22, 7.95], [29.43, 13.25], [31.3, 15.17], [34.96, 18.37], [37.15, 16.73], [39.35, 15.9],
+  [41.54, 16.73], [60.64, 36.19], [61.79, 36.74], [61.79, 44.0], [82, 44.0], [82, 70.69]
+].concat(arcPts(ARC.cx, ARC.cy, ARC.r, 77.0, 127.4, 2.4)).concat([
+  [24.59, 66.81], [17.23, 69.46], [0.27, 38.94], [0.05, 37.38], [16.41, 28.88], [20.43, 28.33],
+  [21.94, 27.88], [27.88, 23.76], [27.88, 22.67], [13.71, 10.51]
+]);
+const ENTRY_EDGE = [[21.94, 27.88], [27.88, 23.76]];          // façade vitrée
+const ANNEX_EDGES = [[61.79, 44.0], [82, 44.0], [82, 70.69]];  // murs portés par la plénière
+const DOORS_REVOLVING = [[23.4, 26.23], [26.96, 24.4]];
+
+const BLOCKS = [
+  { pts: [[14.62, 0.27], [28.33, 12.61], [27.88, 22.67], [13.71, 10.51]], h: 2.6 },
+  { pts: [[28.56, 19.93], [34.27, 22.85], [33.82, 25.41], [28.11, 22.67]], h: 1.6 },
+  { pts: [[34.73, 17.82], [39.35, 15.9], [41.54, 16.73], [61.79, 36.74], [61.79, 44.0], [33.59, 28.33]], h: 2.6 },
+  { pts: [[0.91, 37.47], [16.45, 28.79], [23.67, 35.28], [17.37, 41.77], [7.31, 37.66]], h: 2.6 },
+  { pts: [[0.27, 38.57], [17.23, 69.46], [24.59, 66.81], [24.45, 63.98], [18.74, 63.52], [15.54, 58.5], [9.14, 49.81], [2.28, 41.13]], h: 2.2 },
+  { pts: [[15.68, 43.87], [21.02, 42.5], [24.08, 53.01], [22.85, 60.32], [19.65, 60.32], [16.45, 51.18]], h: 2.6 }
+];
+const PILLARS = [[26.41, 30.16], [32.45, 35.92], [38.84, 41.86], [44.56, 47.07], [50.0, 52.46], [55.62, 57.4],
+  [27.47, 39.67], [33.73, 45.52], [11.01, 44.15]];
+
+const S0 = [22.2, 23.9], S1 = [23.4, 26.4], G1 = [26.0, 32.8], H1 = [30.0, 37.8];
+const P1 = PILLARS[0];   // premier poteau de la rangée principale
+const R1 = (u, v) => [P1[0] + U[0] * u + V[0] * v, P1[1] + U[1] * u + V[1] * v];   // repère de la rangée de poteaux
+const AISLE = [36.3, 43.7], AISLE_END = [48.86, 55.2];   // allée devant les stands 1 à 6
+const GEO = {
+  'pleniere': { kind: 'room', pts: [[61.95, 44.15], [81.85, 44.15], [81.85, 70.55], [61.95, 70.55]], h: 3.4,
+    doors: [[[61.95, 57.35], 3.0]], label: [71.9, 57.35, 4.8],
+    path: [S0, S1, G1, H1, AISLE, AISLE_END, [58.5, 55.6], [60.6, 57.35], [62.6, 57.35]] },
+  'parcours-a': { kind: 'room', sector: [77.5, 92.5], pts: sectorPts(31.2, 37.85, 77.5, 92.5), h: 2.8,
+    doors: [[polar(31.2, 85), 1.7]], label: polar(34.6, 85).concat([4.0]),
+    path: [S0, S1, G1, H1, AISLE, AISLE_END, polar(29.4, 85), polar(31.6, 85)] },
+  'parcours-b': { kind: 'room', sector: [94, 109], pts: sectorPts(31.2, 37.85, 94, 109), h: 2.8,
+    doors: [[polar(31.2, 101.5), 1.7]], label: polar(34.6, 101.5).concat([4.0]),
+    path: [S0, S1, G1, H1, AISLE, [38.4, 53.6], polar(29.4, 101.5), polar(31.6, 101.5)] },
+  'parcours-c': { kind: 'open', c: [27.6, 47.0], a: 8, b: 6.5, label: [27.6, 47.0, 3.8],
+    path: [S0, S1, G1, H1, [29.82, 44.4]] },
+  // stands : s = position le long du groupe, v = panneau, cv = comptoir ; même ordre que la liste des stands dans ZONES
+  'agora-piliers': { kind: 'open', c: R1(20.65, 1.5), a: 22.6, b: 2.6, label: R1(20.65, 1.5).concat([3.8]),
+    booths: [-9.55, -6.35, -1.3, 1.85, 6.4, 9.55].map((s) => ({ s, v: -1.0, w: 3.0, cv: 0.35, cw: 1.9 })),
+    path: [S0, S1, G1, H1, R1(20.5, 3.4)] },
+  'agora-ecran': { kind: 'open', c: [33.87, 54.21], a: 7.4, b: 5, label: [33.87, 54.21, 3.8],
+    booths: [{ s: -1.85, v: -0.06, cv: -1.75 }, { s: 1.85, v: -0.06, cv: -1.75 }, { s: -1.85, v: 0.06, cv: 1.75 }, { s: 1.85, v: 0.06, cv: 1.75 }]
+      .map((b) => Object.assign({ w: 3.5, cw: 1.8 }, b)),
+    path: [S0, S1, G1, H1, AISLE, [36.33, 51.58]] },
+  'cafe': { kind: 'open', c: [59.7, 61.1], a: 4.0, b: 2.6, u: [1, 0], label: [59.7, 61.1, 3.0],
+    path: [S0, S1, G1, H1, AISLE, AISLE_END, [57.0, 61.1]] },
+  'accueil': { kind: 'open', c: [29.4, 27.8], a: 5, b: 3.4, u: FACADE, label: [29.4, 27.8, 2.6],
+    path: [S0, S1, [28.4, 26.4]] },
+  'robot': { kind: 'disc', c: [31.6, 31.2], r: 1.4, label: [31.6, 31.2, 2.6],
+    path: [S0, S1, G1, [30.3, 31.7]] }
+};
+for (const id in GEO) {
+  const g = GEO[id];
+  if (g.kind === 'open') g.pts = rectPts(g.c, g.a, g.b, g.u);
+  if (g.kind === 'disc') g.pts = circlePts(g.c, g.r, 20);
+}
+const MAP_TAGS = [
+  { t: 'Entrée', p: [S0[0] - 0.8, S0[1] - 1.2, 0.3], entry: true },
+  { t: 'Hall d’entrée', p: [42.6, 43.2, 0.1] },
+  { t: 'Locaux techniques', p: [21.2, 11.4, 2.7] },
+  { t: 'Escalier', p: [31.2, 22.6, 1.7], minor: true },
+  { t: 'Ascenseurs', p: [37.6, 24.4, 2.7], minor: true }
+];
+const CX = 41, CY = 36;   // centre de la maquette
+
+/* =====================================================================
+   3. OUTILS
+   ===================================================================== */
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const zoneById = Object.fromEntries(ZONES.map((z, i) => [z.id, Object.assign(z, { num: i + 1 })]));
+
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function hex(c) {
+  c = (c || '#888').replace('#', '');
+  if (c.length === 3) c = c.split('').map((x) => x + x).join('');
+  const n = parseInt(c, 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+}
+const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const shade = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+const W = (p) => [p[0] - CX, p[1] - CY];   // plan -> monde (x, z)
+
+function area2(pts) { let s = 0; for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; s += a[0] * b[1] - b[0] * a[1]; } return s / 2; }
+function inTri(p, a, b, c) {
+  const d1 = (p[0] - b[0]) * (a[1] - b[1]) - (a[0] - b[0]) * (p[1] - b[1]);
+  const d2 = (p[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (p[1] - c[1]);
+  const d3 = (p[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (p[1] - a[1]);
+  const neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(neg && pos);
+}
+function triangulate(pts) {
+  const idx = pts.map((_, i) => i); if (area2(pts) < 0) idx.reverse();
+  const out = []; let guard = 0;
+  while (idx.length > 3 && guard++ < 10000) {
+    let cut = false;
+    for (let i = 0; i < idx.length; i++) {
+      const ia = idx[(i + idx.length - 1) % idx.length], ib = idx[i], ic = idx[(i + 1) % idx.length];
+      const A = pts[ia], B = pts[ib], C = pts[ic];
+      const cr = (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0]);
+      if (cr <= 1e-9) continue;
+      let blocked = false;
+      for (const j of idx) { if (j === ia || j === ib || j === ic) continue; if (inTri(pts[j], A, B, C)) { blocked = true; break; } }
+      if (blocked) continue;
+      out.push([ia, ib, ic]); idx.splice(i, 1); cut = true; break;
+    }
+    if (!cut) { for (let i = 1; i < idx.length - 1; i++) out.push([idx[0], idx[i], idx[i + 1]]); return out; }
+  }
+  if (idx.length === 3) out.push([idx[0], idx[1], idx[2]]);
+  return out;
+}
+function pointInPoly(p, pts) {
+  let ins = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const a = pts[i], b = pts[j];
+    if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) ins = !ins;
+  }
+  return ins;
+}
+function dedupe(pts) {
+  const o = [];
+  for (const p of pts) { const q = o[o.length - 1]; if (!q || Math.hypot(p[0] - q[0], p[1] - q[1]) > 0.05) o.push(p); }
+  if (o.length > 2 && Math.hypot(o[0][0] - o[o.length - 1][0], o[0][1] - o[o.length - 1][1]) < 0.05) o.pop();
+  return o;
+}
+
+/* =====================================================================
+   4. CONSTRUCTION DE LA MAQUETTE (triangles colorés, une passe)
+   ===================================================================== */
+function Builder() { this.p = []; this.n = []; this.c = []; this.z = []; this.lp = []; this.lc = []; this.lz = []; }
+Builder.prototype.tri = function (a, b, c, n, col, z) {
+  this.p.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
+  for (let i = 0; i < 3; i++) { this.n.push(n[0], n[1], n[2]); this.c.push(col[0], col[1], col[2]); this.z.push(z); }
+};
+Builder.prototype.flat = function (pts, y, col, z) {     // pts en coordonnées monde (x, z)
+  pts = dedupe(pts); const t = triangulate(pts);
+  for (const [a, b, c] of t) this.tri([pts[a][0], y, pts[a][1]], [pts[b][0], y, pts[b][1]], [pts[c][0], y, pts[c][1]], [0, 1, 0], col, z);
+};
+Builder.prototype.prism = function (pts, y0, y1, top, side, z, noTop) {
+  pts = dedupe(pts); const ccw = area2(pts) > 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1;
+    // normale sortante : dépend du sens du polygone dans le repère (x, z)
+    const n = ccw ? [dz / L, 0, -dx / L] : [-dz / L, 0, dx / L];
+    const p1 = [a[0], y0, a[1]], p2 = [b[0], y0, b[1]], p3 = [b[0], y1, b[1]], p4 = [a[0], y1, a[1]];
+    this.tri(p1, p2, p3, n, side, z); this.tri(p1, p3, p4, n, side, z);
+  }
+  if (!noTop) this.flat(pts, y1, top, z);
+};
+Builder.prototype.box = function (c, w, d, y0, h, ang, top, side, z) {   // c en monde, w le long de ang
+  const u = [Math.cos(ang), Math.sin(ang)], v = [-u[1], u[0]];
+  const pts = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => [c[0] + s * w / 2 * u[0] + t * d / 2 * v[0], c[1] + s * w / 2 * u[1] + t * d / 2 * v[1]]);
+  this.prism(pts, y0, y0 + h, top, side, z);
+};
+Builder.prototype.wall = function (a, b, t, y0, h, col, z) {
+  const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < 0.02) return;
+  this.box([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], L + t, t, y0, h, Math.atan2(dz, dx), shade(col, 1.08), col, z);
+};
+Builder.prototype.cyl = function (c, r, y0, h, top, side, z, n) {
+  this.prism(circlePts(c, r, n || 14), y0, y0 + h, top, side, z);
+};
+Builder.prototype.loop = function (pts, y, col, z) {
+  pts = dedupe(pts);
+  for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; this.line([a[0], y, a[1]], [b[0], y, b[1]], col, z); }
+};
+Builder.prototype.line = function (a, b, col, z) {
+  this.lp.push(a[0], a[1], a[2], b[0], b[1], b[2]);
+  for (let i = 0; i < 2; i++) { this.lc.push(col[0], col[1], col[2]); this.lz.push(z); }
+};
+
+// murs le long d'un contour, avec ouvertures (portes) et arêtes ignorées
+function wallsAlong(B, pts, opt) {
+  pts = opt.open ? pts : dedupe(pts);
+  const gaps = (opt.doors || []).map(([p, w]) => [W(p), w]);
+  const skip = (opt.skip || []).map((e) => e.map(W));
+  const near = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 0.15;
+  const nEdges = opt.open ? pts.length - 1 : pts.length;
+  for (let i = 0; i < nEdges; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    if (skip.some((e) => (near(e[0], a) && near(e[1], b)) || (near(e[1], a) && near(e[0], b)))) continue;
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]); const n = Math.max(1, Math.ceil(L / 0.25));
+    let runStart = null;
+    for (let k = 0; k <= n; k++) {
+      const t0 = k / n, mid = [a[0] + (b[0] - a[0]) * (k + 0.5) / n, a[1] + (b[1] - a[1]) * (k + 0.5) / n];
+      const open = k === n || gaps.some(([g, w]) => Math.hypot(mid[0] - g[0], mid[1] - g[1]) < w / 2);
+      if (!open && runStart === null) runStart = t0;
+      if (open && runStart !== null) {
+        const p = [a[0] + (b[0] - a[0]) * runStart, a[1] + (b[1] - a[1]) * runStart];
+        const q = [a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0];
+        B.wall(p, q, opt.t, opt.y0 || 0, opt.h, opt.col, opt.z || 0);
+        runStart = null;
+      }
+    }
+  }
+}
+
+function buildScene(T) {
+  const B = new Builder();
+  // sol extérieur et quadrillage (10 m)
+  B.flat([[-170, -170], [170, -170], [170, 170], [-170, 170]], -0.3, T.ground, 0);
+  for (let g = -150; g <= 150; g += 10) {
+    B.line([g, -0.28, -150], [g, -0.28, 150], T.grid, 0);
+    B.line([-150, -0.28, g], [150, -0.28, g], T.grid, 0);
+  }
+  // dalle du bâtiment
+  const outline = OUTLINE.map(W);
+  B.prism(outline, -0.3, 0, T.slab, shade(T.wall, 0.92), 0);
+  B.loop(outline, 0.005, T.edge, 0);
+  // murs extérieurs (bas, pour voir l'intérieur)
+  wallsAlong(B, outline, { t: 0.3, h: 1.9, col: T.wall, skip: [ENTRY_EDGE, [ANNEX_EDGES[0], ANNEX_EDGES[1]], [ANNEX_EDGES[1], ANNEX_EDGES[2]], [ANNEX_EDGES[2], [61.79, 70.69]]] });
+  // façade vitrée et portes tambour
+  wallsAlong(B, ENTRY_EDGE.map(W), { open: true, t: 0.12, h: 1.9, col: T.glass, doors: DOORS_REVOLVING.map((d) => [d, 2.4]) });
+  for (const d of DOORS_REVOLVING) {
+    const c = W(d);
+    B.flat(circlePts(c, 1.1, 24), 0.015, mix(T.slab, T.glass, 0.45), 0);
+    B.loop(circlePts(c, 1.1, 24), 1.9, T.glass, 0);
+    B.loop(circlePts(c, 1.1, 24), 0.02, T.glass, 0);
+    B.box(c, 2.1, 0.06, 0, 1.9, 0.62, T.glass, T.glass, 0);
+    B.box(c, 2.1, 0.06, 0, 1.9, 0.62 + Math.PI / 2, T.glass, T.glass, 0);
+  }
+  // flèche d'entrée au sol (parvis)
+  {
+    const c = W(S0), dir = [-FACADE[1], FACADE[0]];   // vers l'intérieur
+    const a = Math.atan2(dir[1], dir[0]);
+    const tipL = 1.6, ang = (s, t) => [c[0] + s * Math.cos(a) - t * Math.sin(a), c[1] + s * Math.sin(a) + t * Math.cos(a)];
+    B.flat([ang(-2.2, -0.35), ang(0, -0.35), ang(0, 0.35), ang(-2.2, 0.35)], 0.02, T.path, 0);
+    B.flat([ang(0, -0.95), ang(tipL, 0), ang(0, 0.95)], 0.02, T.path, 0);
+  }
+  // locaux hors forum
+  for (const b of BLOCKS) {
+    const pts = b.pts.map(W);
+    B.prism(pts, 0, b.h, T.blockTop, T.block, 0);
+    B.loop(pts, b.h + 0.01, T.edge, 0);
+  }
+  // escalier : marches dessinées sur le bloc
+  {
+    const s = BLOCKS[1].pts.map(W);
+    for (let i = 1; i < 8; i++) {
+      const t = i / 8;
+      B.line([s[0][0] + (s[1][0] - s[0][0]) * t, 1.62, s[0][1] + (s[1][1] - s[0][1]) * t], [s[3][0] + (s[2][0] - s[3][0]) * t, 1.62, s[3][1] + (s[2][1] - s[3][1]) * t], T.edge, 0);
+    }
+  }
+  // poteaux
+  for (const p of PILLARS) B.cyl(W(p), 0.38, 0, 3.0, shade(T.pillar, 1.06), T.pillar, 0, 16);
+
+  // espaces du forum
+  for (const z of ZONES) {
+    const g = GEO[z.id], col = T.zones[z.id], id = z.num, pts = g.pts.map(W);
+    const floor = mix(T.slab, col, T.dark ? 0.32 : 0.2);
+    const deep = mix(col, T.ink, T.dark ? 0.15 : 0.32);
+    B.flat(pts, 0.02, floor, id);
+    if (g.kind === 'room') {
+      wallsAlong(B, pts, { t: 0.22, h: g.h, col, z: id, doors: g.doors.map(([p, w]) => [p, w]) });
+      B.loop(pts, g.h + 0.01, deep, id);
+    } else {
+      B.loop(pts, 0.04, col, id);
+    }
+    furnish(B, z.id, g, T, col, deep, id);
+  }
+  return B;
+}
+
+function chair(B, c, ang, col, back, id) {   // ang : direction du regard
+  const f = [Math.cos(ang), Math.sin(ang)];
+  B.box(c, 0.48, 0.48, 0, 0.46, ang, col, shade(col, 0.9), id);
+  B.box([c[0] - f[0] * 0.22, c[1] - f[1] * 0.22], 0.08, 0.48, 0.46, 0.42, ang, back, back, id);
+}
+function furnish(B, id, g, T, col, deep, zid) {
+  const seat = mix(col, T.ink, T.dark ? 0.05 : 0.18), seatBack = mix(col, T.ink, T.dark ? 0.2 : 0.38);
+  if (id === 'pleniere') {
+    B.box(W([79.7, 57.35]), 3.8, 19.6, 0, 0.6, 0, mix(col, T.slab, 0.25), deep, zid);              // scène
+    B.box(W([81.55, 57.35]), 0.15, 9, 1.2, 2.0, 0, T.screen, T.screen, zid);                         // écran
+    B.box(W([78.6, 52.2]), 0.6, 0.5, 0.6, 1.1, 0, deep, deep, zid);                                 // pupitre
+    for (let x = 64.0; x <= 75.1; x += 1.0) {
+      for (let y = 46.4; y <= 55.7; y += 0.62) chair(B, W([x, y]), 0, seat, seatBack, zid);
+      for (let y = 59.0; y <= 68.4; y += 0.62) chair(B, W([x, y]), 0, seat, seatBack, zid);
+    }
+  } else if (g.sector) {
+    const mid = (g.sector[0] + g.sector[1]) / 2, ar = mid * Math.PI / 180;
+    const radial = [Math.cos(ar), Math.sin(ar)], e = [Math.sin(ar), -Math.cos(ar)];   // e : vers l'écran (est)
+    const at = (de, dr) => { const c = polar(34.6, mid); return W([c[0] + e[0] * de + radial[0] * dr, c[1] + e[1] * de + radial[1] * dr]); };
+    const look = Math.atan2(e[1], e[0]);
+    B.box(at(4.2, 0), 0.14, 3.4, 0.9, 1.5, look, T.screen, T.screen, zid);
+    for (const de of [-3.0, -1.9, -0.8, 0.3, 1.4]) for (const dr of [-2.2, -1.32, -0.44, 0.44, 1.32, 2.2]) chair(B, at(de, dr), look, seat, seatBack, zid);
+  } else if (id === 'parcours-c') {
+    const c = g.c;                                       // écran adossé au sud-ouest, face au hall
+    const P = (du, dv) => W([c[0] + U[0] * du + V[0] * dv, c[1] + U[1] * du + V[1] * dv]);
+    const ang = Math.atan2(U[1], U[0]);
+    B.box(P(0, 2.85), 5.6, 0.6, 0, 0.7, ang, deep, deep, zid);
+    B.box(P(0, 2.85), 5.2, 0.2, 0.7, 2.3, ang, T.screen, T.screen, zid);
+    for (const dv of [0.9, -0.4, -1.7]) B.box(P(0, dv), 4.4, 0.45, 0, 0.45, ang, seat, shade(seat, 0.9), zid);
+  } else if (g.booths) {
+    // stands de l'Agora : panneau et comptoir à la couleur du niveau de chaque stand
+    const c = g.c, ang = Math.atan2(U[1], U[0]), stands = zoneById[id].stands;
+    const P = (du, dv) => W([c[0] + U[0] * du + V[0] * dv, c[1] + U[1] * du + V[1] * dv]);
+    const sep = mix(T.counter, T.ink, 0.12);
+    g.booths.forEach((b, i) => {
+      const lc = T.levels[stands[i].niveau];
+      B.box(P(b.s, b.v), b.w, 0.08, 0, 2.5, ang, lc, lc, zid);
+      B.box(P(b.s, b.cv), b.cw, 0.55, 0, 1.0, ang, mix(T.counter, lc, 0.18), mix(T.counter, lc, 0.45), zid);
+      if (stands[i].n === 'Café') B.box(P(b.s + 1.2, b.cv), 0.45, 0.35, 1.0, 0.45, ang, T.screen, T.screen, zid);
+    });
+    if (id === 'agora-piliers') for (const s of [-7.95, 0.275, 7.95]) B.box(P(s, -0.35), 0.06, 1.3, 0, 2.2, ang, sep, sep, zid);
+    else { B.box(P(0, -1.1), 0.06, 2.2, 0, 2.2, ang, sep, sep, zid); B.box(P(0, 1.1), 0.06, 2.2, 0, 2.2, ang, sep, sep, zid); }
+  } else if (id === 'cafe') {
+    // comptoir adossé au mur de la plénière, machine à café, mange-debout
+    B.box(W([61.05, 61.1]), 0.6, 2.4, 0, 1.0, 0, mix(T.counter, col, 0.18), mix(T.counter, col, 0.45), zid);
+    B.box(W([61.1, 60.4]), 0.4, 0.45, 1.0, 0.5, 0, T.screen, T.screen, zid);
+    for (const y of [60.45, 61.8]) {
+      B.cyl(W([58.55, y]), 0.08, 0, 1.0, T.counter, shade(T.counter, 0.85), zid, 10);
+      B.cyl(W([58.55, y]), 0.36, 1.0, 0.06, T.counter, shade(T.counter, 0.9), zid, 16);
+    }
+  } else if (id === 'accueil') {
+    const ang = Math.atan2(FACADE[1], FACADE[0]);
+    B.box(W(g.c), 4.0, 0.9, 0, 1.05, ang, mix(col, T.slab, 0.55), col, zid);
+  } else if (id === 'robot') {
+    const c = W(g.c), body = T.dark ? [0.82, 0.85, 0.89] : [0.93, 0.94, 0.96];
+    B.cyl(c, 0.34, 0, 0.9, body, shade(body, 0.92), zid, 16);
+    B.box(c, 0.52, 0.42, 0.95, 0.4, Math.atan2(-FACADE_N[1], -FACADE_N[0]), col, col, zid);
+    const f = [-FACADE_N[0], -FACADE_N[1]];
+    B.box([c[0] + f[0] * 0.22, c[1] + f[1] * 0.22], 0.08, 0.3, 1.08, 0.08, Math.atan2(f[1], f[0]), [0.45, 0.85, 1.0], [0.45, 0.85, 1.0], zid);
+  }
+}
+
+/* =====================================================================
+   5. RENDU WEBGL
+   ===================================================================== */
+const canvas = $('#scene'), mapEl = $('#map'), labelsEl = $('#labels');
+const gl = canvas.getContext('webgl', { antialias: true, alpha: false }) || canvas.getContext('experimental-webgl');
+
+const VS = `
+attribute vec3 aPos; attribute vec3 aNrm; attribute vec3 aCol; attribute float aZone;
+uniform mat4 uVP; uniform vec3 uLight; uniform float uHover; uniform float uSel; uniform float uAmb; uniform float uDiff; uniform vec3 uFade;
+varying vec3 vCol;
+void main(){
+  vec3 n = normalize(aNrm);
+  float d = max(dot(n, uLight), 0.0);
+  float hemi = 0.86 + 0.14 * n.y;
+  vec3 c = aCol * (uAmb + uDiff * d) * hemi;
+  if (abs(n.y) < 0.5) c *= mix(0.80, 1.0, clamp(aPos.y / 1.6, 0.0, 1.0));
+  float isZone = step(0.5, aZone);
+  float isSel = isZone * (1.0 - step(0.1, abs(aZone - uSel)));
+  float isHov = isZone * (1.0 - step(0.1, abs(aZone - uHover)));
+  c = mix(c, c * 1.1 + 0.04, isHov * (1.0 - isSel));
+  float dimAmt = step(0.5, uSel) * isZone * (1.0 - isSel) * 0.55;
+  float g = dot(c, vec3(0.299, 0.587, 0.114));
+  c = mix(c, mix(vec3(g), uFade, 0.35), dimAmt);
+  vCol = c;
+  gl_Position = uVP * vec4(aPos, 1.0);
+}`;
+const FS = `precision mediump float; varying vec3 vCol; void main(){ gl_FragColor = vec4(vCol, 1.0); }`;
+const LVS = `
+attribute vec3 aPos; attribute vec3 aCol; attribute float aZone;
+uniform mat4 uVP; uniform float uSel; uniform vec3 uFade;
+varying vec3 vCol;
+void main(){
+  float isZone = step(0.5, aZone);
+  float isSel = isZone * (1.0 - step(0.1, abs(aZone - uSel)));
+  vCol = mix(aCol, uFade, step(0.5, uSel) * isZone * (1.0 - isSel) * 0.5);
+  gl_Position = uVP * vec4(aPos, 1.0);
+}`;
+const PVS = `
+attribute vec3 aPos; attribute float aDist;
+uniform mat4 uVP; varying float vDist;
+void main(){ vDist = aDist; gl_Position = uVP * vec4(aPos, 1.0); }`;
+const PFS = `precision mediump float; varying float vDist; uniform float uTime; uniform vec3 uA; uniform vec3 uB;
+void main(){
+  if (vDist < 0.0) { gl_FragColor = vec4(uA, 1.0); return; }
+  float k = fract((vDist - uTime * 3.0) / 2.2);
+  gl_FragColor = vec4(mix(uA, uB, step(0.58, k)), 1.0);
+}`;
+
+function compile(vs, fs) {
+  const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const p = gl.createProgram(); gl.attachShader(p, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const info = { p, a: {}, u: {} };
+  const na = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES); for (let i = 0; i < na; i++) { const n = gl.getActiveAttrib(p, i).name; info.a[n] = gl.getAttribLocation(p, n); }
+  const nu = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS); for (let i = 0; i < nu; i++) { const n = gl.getActiveUniform(p, i).name; info.u[n] = gl.getUniformLocation(p, n); }
+  return info;
+}
+function buffer(data) { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW); return b; }
+function bindAttr(prog, name, buf, size) {
+  const loc = prog.a[name]; if (loc === undefined || loc < 0) return;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+}
+
+// matrices (colonnes)
+function perspective(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) * nf, -1, 0, 0, 2 * far * near * nf, 0];
+}
+function lookAt(e, c, up) {
+  let z = [e[0] - c[0], e[1] - c[1], e[2] - c[2]]; let l = Math.hypot(...z); z = z.map((v) => v / l);
+  let x = [up[1] * z[2] - up[2] * z[1], up[2] * z[0] - up[0] * z[2], up[0] * z[1] - up[1] * z[0]]; l = Math.hypot(...x) || 1; x = x.map((v) => v / l);
+  const y = [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]];
+  return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0,
+    -(x[0] * e[0] + x[1] * e[1] + x[2] * e[2]), -(y[0] * e[0] + y[1] * e[1] + y[2] * e[2]), -(z[0] * e[0] + z[1] * e[1] + z[2] * e[2]), 1];
+}
+function mul(a, b) {
+  const o = new Array(16);
+  for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) {
+    o[c * 4 + r] = a[r] * b[c * 4] + a[4 + r] * b[c * 4 + 1] + a[8 + r] * b[c * 4 + 2] + a[12 + r] * b[c * 4 + 3];
+  }
+  return o;
+}
+
+const FOV = 34 * Math.PI / 180;
+const cam = { yaw: 0, pitch: 0.92, dist: 120, tx: 0, tz: 0 };
+const goal = Object.assign({}, cam);
+const HOME_YAW = Math.atan2(24 - CX, 26 - CY);   // la caméra se place du côté de l'entrée
+let VP = null, eye = [0, 0, 0], camBasis = null, viewW = 1, viewH = 1, dpr = 1;
+let progs = null, bufs = null, pathBuf = null, counts = { tri: 0, line: 0, path: 0 }, theme = null;
+let hoverNum = 0, selNum = 0, pathOn = true, pathStart = 0, needs = true, running = false;
+
+function readTheme() {
+  const T = {
+    bg: hex(cssVar('--map-bg')), ground: hex(cssVar('--map-ground')), grid: hex(cssVar('--map-grid')), slab: hex(cssVar('--map-slab')),
+    wall: hex(cssVar('--map-wall')), block: hex(cssVar('--map-block')), pillar: hex(cssVar('--map-pillar')), edge: hex(cssVar('--map-edge')),
+    glass: hex(cssVar('--map-glass')), screen: hex(cssVar('--map-screen')), counter: hex(cssVar('--map-counter')),
+    path: hex(cssVar('--map-path')), pathGap: hex(cssVar('--map-path-gap')), ink: hex(cssVar('--ink')), zones: {}, levels: {}
+  };
+  T.blockTop = mix(T.block, T.slab, 0.25);
+  const g = T.bg; T.dark = (0.299 * g[0] + 0.587 * g[1] + 0.114 * g[2]) < 0.4;
+  for (const k in NIVEAUX) T.levels[k] = hex(cssVar(NIVEAUX[k].couleur));
+  for (const z of ZONES) T.zones[z.id] = T.levels[z.niveau];
+  return T;
+}
+
+function uploadScene() {
+  theme = readTheme();
+  const B = buildScene(theme);
+  if (bufs) for (const k in bufs) gl.deleteBuffer(bufs[k]);
+  bufs = { p: buffer(B.p), n: buffer(B.n), c: buffer(B.c), z: buffer(B.z), lp: buffer(B.lp), lc: buffer(B.lc), lz: buffer(B.lz) };
+  counts.tri = B.p.length / 3; counts.line = B.lp.length / 3;
+  gl.clearColor(theme.bg[0], theme.bg[1], theme.bg[2], 1);
+  buildPath();
+  requestRender();
+}
+
+function buildPath() {
+  if (!gl || !progs) return;
+  if (pathBuf) { gl.deleteBuffer(pathBuf.p); gl.deleteBuffer(pathBuf.d); pathBuf = null; }
+  counts.path = 0;
+  const z = selNum ? ZONES[selNum - 1] : null;
+  if (!z || !pathOn) return;
+  const pts = GEO[z.id].path.map(W), P = [], D = [], y = 0.07, w = 0.28;
+  const quad = (a, b, c, d, da, db) => { P.push(a[0], y, a[1], b[0], y, b[1], c[0], y, c[1], a[0], y, a[1], c[0], y, c[1], d[0], y, d[1]); D.push(da, db, db, da, db, da); };
+  const disc = (c, r, dist, yy) => { for (let i = 0; i < 18; i++) { const a0 = i / 18 * 6.2832, a1 = (i + 1) / 18 * 6.2832; P.push(c[0], yy, c[1], c[0] + r * Math.cos(a0), yy, c[1] + r * Math.sin(a0), c[0] + r * Math.cos(a1), yy, c[1] + r * Math.sin(a1)); D.push(dist, dist, dist); } };
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L * w, nz = dx / L * w;
+    quad([a[0] + nx, a[1] + nz], [b[0] + nx, b[1] + nz], [b[0] - nx, b[1] - nz], [a[0] - nx, a[1] - nz], acc, acc + L);
+    acc += L;
+    if (i < pts.length - 2) disc(b, w, acc, y);
+  }
+  disc(pts[0], 0.75, -1, y + 0.005);
+  const end = pts[pts.length - 1]; disc(end, 0.75, -1, y + 0.005);
+  pathBuf = { p: buffer(P), d: buffer(D) }; counts.path = P.length / 3; pathStart = performance.now();
+}
+
+function camEye(c) {
+  const cp = Math.cos(c.pitch);
+  return [c.tx + c.dist * cp * Math.sin(c.yaw), c.dist * Math.sin(c.pitch), c.tz + c.dist * cp * Math.cos(c.yaw)];
+}
+function updateMatrices() {
+  eye = camEye(cam);
+  const target = [cam.tx, 0, cam.tz];
+  const proj = perspective(FOV, viewW / viewH, 1, 900);
+  const view = lookAt(eye, target, [0, 1, 0]);
+  VP = mul(proj, view);
+  // base caméra pour les rayons
+  let f = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]]; let l = Math.hypot(...f); f = f.map((v) => v / l);
+  let r = [f[1] * 0 - f[2] * 1, f[2] * 0 - f[0] * 0, f[0] * 1 - f[1] * 0]; l = Math.hypot(...r) || 1; r = r.map((v) => v / l);
+  const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+  camBasis = { f, r, u };
+}
+function project(x, y, z) {
+  const m = VP; const cx = m[0] * x + m[4] * y + m[8] * z + m[12], cy = m[1] * x + m[5] * y + m[9] * z + m[13], cw = m[3] * x + m[7] * y + m[11] * z + m[15];
+  if (cw <= 0.1) return null;
+  return [(cx / cw + 1) / 2 * viewW, (1 - cy / cw) / 2 * viewH, cw];
+}
+function rayAt(px, py) {
+  const nx = px / viewW * 2 - 1, ny = 1 - py / viewH * 2, t = Math.tan(FOV / 2), a = viewW / viewH, { f, r, u } = camBasis;
+  const d = [f[0] + nx * t * a * r[0] + ny * t * u[0], f[1] + nx * t * a * r[1] + ny * t * u[1], f[2] + nx * t * a * r[2] + ny * t * u[2]];
+  const l = Math.hypot(...d); return { o: eye, d: d.map((v) => v / l) };
+}
+
+function draw(now) {
+  if (!VP) updateMatrices();
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.disable(gl.CULL_FACE);
+  const fade = theme.bg;
+  // faces
+  const P = progs.mesh; gl.useProgram(P.p);
+  gl.uniformMatrix4fv(P.u.uVP, false, new Float32Array(VP));
+  const L = [0.32, 0.82, -0.47], ll = Math.hypot(...L);
+  gl.uniform3f(P.u.uLight, L[0] / ll, L[1] / ll, L[2] / ll);
+  gl.uniform1f(P.u.uAmb, theme.dark ? 0.66 : 0.7); gl.uniform1f(P.u.uDiff, theme.dark ? 0.42 : 0.38);
+  gl.uniform1f(P.u.uHover, hoverNum); gl.uniform1f(P.u.uSel, selNum); gl.uniform3f(P.u.uFade, fade[0], fade[1], fade[2]);
+  bindAttr(P, 'aPos', bufs.p, 3); bindAttr(P, 'aNrm', bufs.n, 3); bindAttr(P, 'aCol', bufs.c, 3); bindAttr(P, 'aZone', bufs.z, 1);
+  gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1, 1);
+  gl.drawArrays(gl.TRIANGLES, 0, counts.tri);
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+  for (const k in P.a) gl.disableVertexAttribArray(P.a[k]);
+  // arêtes
+  const Q = progs.line; gl.useProgram(Q.p);
+  gl.uniformMatrix4fv(Q.u.uVP, false, new Float32Array(VP)); gl.uniform1f(Q.u.uSel, selNum); gl.uniform3f(Q.u.uFade, fade[0], fade[1], fade[2]);
+  bindAttr(Q, 'aPos', bufs.lp, 3); bindAttr(Q, 'aCol', bufs.lc, 3); bindAttr(Q, 'aZone', bufs.lz, 1);
+  gl.drawArrays(gl.LINES, 0, counts.line);
+  for (const k in Q.a) gl.disableVertexAttribArray(Q.a[k]);
+  // itinéraire
+  if (pathBuf && counts.path) {
+    const R = progs.path; gl.useProgram(R.p);
+    gl.uniformMatrix4fv(R.u.uVP, false, new Float32Array(VP));
+    gl.uniform1f(R.u.uTime, reduceMotion ? 0 : (now - pathStart) / 1000);
+    gl.uniform3f(R.u.uA, theme.path[0], theme.path[1], theme.path[2]); gl.uniform3f(R.u.uB, theme.pathGap[0], theme.pathGap[1], theme.pathGap[2]);
+    bindAttr(R, 'aPos', pathBuf.p, 3); bindAttr(R, 'aDist', pathBuf.d, 1);
+    gl.drawArrays(gl.TRIANGLES, 0, counts.path);
+    for (const k in R.a) gl.disableVertexAttribArray(R.a[k]);
+  }
+}
+
+/* ---------- caméra ---------- */
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function angDiff(a, b) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
+function fitDist(pitch, yaw, tx, tz, pts, margin) {
+  // distance pour que tous les points tiennent dans la vue
+  const saved = Object.assign({}, cam); let d = 80;
+  for (let it = 0; it < 6; it++) {
+    Object.assign(cam, { pitch, yaw, tx, tz, dist: d }); updateMatrices();
+    let m = 0;
+    for (const p of pts) { const q = project(p[0], p[1], p[2]); if (!q) { m = 2; break; } m = Math.max(m, Math.abs(q[0] / viewW * 2 - 1), Math.abs(q[1] / viewH * 2 - 1)); }
+    d = d * (m / margin);
+  }
+  Object.assign(cam, saved); updateMatrices();
+  return clamp(d, 18, 320);
+}
+const BOUNDS = (() => { const o = []; for (const p of OUTLINE) { const w = W(p); o.push([w[0], 0, w[1]], [w[0], 3, w[1]]); } return o; })();
+function homeGoal(top) {
+  const pitch = top ? 1.53 : 0.93, yaw = HOME_YAW;
+  let tx = 0, tz = 0, dist = fitDist(pitch, yaw, tx, tz, BOUNDS, 0.88);
+  // recentre la maquette dans le cadre (la perspective la décale)
+  const saved = Object.assign({}, cam);
+  for (let it = 0; it < 3; it++) {
+    Object.assign(cam, { pitch, yaw, tx, tz, dist }); updateMatrices();
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const p of BOUNDS) { const q = project(p[0], p[1], p[2]); if (!q) continue; x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+    const mx = ((x0 + x1) / 2 / viewW) * 2 - 1, my = 1 - ((y0 + y1) / 2 / viewH) * 2;
+    const half = dist * Math.tan(FOV / 2);
+    const r = [Math.cos(yaw), -Math.sin(yaw)], fh = [-Math.sin(yaw), -Math.cos(yaw)];
+    const sx = mx * half * (viewW / viewH), sy = my * half / Math.max(Math.sin(pitch), 0.35);
+    tx += r[0] * sx + fh[0] * sy; tz += r[1] * sx + fh[1] * sy;
+    dist = fitDist(pitch, yaw, tx, tz, BOUNDS, 0.88);
+  }
+  Object.assign(cam, saved); updateMatrices();
+  return { pitch, yaw, tx, tz, dist };
+}
+function zoneGoal(z) {
+  const g = GEO[z.id], pts = g.pts.map(W), c = pts.reduce((s, p) => [s[0] + p[0] / pts.length, s[1] + p[1] / pts.length], [0, 0]);
+  const pitch = topView ? 1.53 : 0.88, yaw = cam.yaw;
+  const box = []; for (const p of pts) box.push([p[0], 0, p[1]], [p[0], 3, p[1]]);
+  const d = Math.max(fitDist(pitch, yaw, c[0], c[1], box, 0.5), 48);
+  return { pitch, yaw, tx: c[0], tz: c[1], dist: d };
+}
+function setGoal(g, instant) {
+  Object.assign(goal, g);
+  if (instant || reduceMotion) Object.assign(cam, goal);
+  requestRender();
+}
+function step(dt) {
+  const k = 1 - Math.exp(-dt * 7.5);
+  let moving = false;
+  const dy = angDiff(cam.yaw, goal.yaw);
+  for (const [key, d] of [['yaw', dy], ['pitch', goal.pitch - cam.pitch], ['dist', goal.dist - cam.dist], ['tx', goal.tx - cam.tx], ['tz', goal.tz - cam.tz]]) {
+    const scale = key === 'dist' ? cam.dist * 0.001 : (key === 'tx' || key === 'tz') ? 0.01 : 0.0005;
+    if (Math.abs(d) > scale) { cam[key] += d * k; moving = true; } else cam[key] = key === 'yaw' ? goal.yaw : goal[key];
+  }
+  return moving;
+}
+
+/* ---------- boucle ---------- */
+let last = 0;
+function requestRender() { if (!gl || !progs || !bufs) return; needs = true; if (!running) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const moving = step(dt);
+  updateMatrices();
+  draw(now);
+  placeLabels();
+  const animPath = pathBuf && counts.path && !reduceMotion;
+  if (moving || animPath || needs) { needs = false; requestAnimationFrame(frame); } else running = false;
+  if (!moving && !animPath) needs = false;
+}
+
+/* =====================================================================
+   6. ÉTIQUETTES SUR LA MAQUETTE
+   ===================================================================== */
+const pins = [];
+function buildLabels() {
+  labelsEl.textContent = '';
+  pins.length = 0;
+  for (const t of MAP_TAGS) {
+    const d = el('div', 'tag-map' + (t.entry ? ' is-entry' : ''));
+    if (t.entry) d.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+    d.appendChild(document.createTextNode(t.t));
+    d.setAttribute('aria-hidden', 'true');
+    labelsEl.appendChild(d);
+    const w = W(t.p); pins.push({ el: d, pos: [w[0], t.p[2], w[1]], tag: true, minor: !!t.minor });
+  }
+  // pastilles numérotées des stands (visibles de près)
+  for (const z of ZONES) {
+    const g = GEO[z.id]; if (!g.booths) continue;
+    g.booths.forEach((b, i) => {
+      const av = b.v + (b.cv - b.v) * 0.5;   // entre le panneau et le comptoir, pour séparer les stands dos à dos
+      const st = z.stands[i], p = [g.c[0] + U[0] * b.s + V[0] * av, g.c[1] + U[1] * b.s + V[1] * av], w = W(p);
+      const d = el('div', 'badge', st.n); d.setAttribute('aria-hidden', 'true');
+      d.style.setProperty('--z', 'var(' + NIVEAUX[st.niveau].couleur + ')');
+      labelsEl.appendChild(d);
+      pins.push({ el: d, pos: [w[0], 2.6, w[1]], tag: true, minor: true, badge: true, zoneNum: z.num });
+    });
+  }
+  for (const z of ZONES) {
+    const g = GEO[z.id], w = W(g.label);
+    const b = el('button', 'pin'); b.type = 'button';
+    b.style.setProperty('--z', 'var(' + z.couleur + ')');
+    b.setAttribute('aria-label', z.nom + ', ' + z.sous + ' : afficher le détail');
+    const card = el('span', 'pin-card'); card.appendChild(el('span', 'dot'));
+    const tx = el('span', 'pin-txt'); tx.appendChild(el('span', 'pin-name', z.pin || z.nom));
+    if (z.pinSous) tx.appendChild(el('span', 'pin-sub', z.pinSub || z.sous));
+    card.appendChild(tx); b.appendChild(card); b.appendChild(el('span', 'pin-stem'));
+    b.addEventListener('click', () => selectZone(z.id, true));
+    b.addEventListener('pointerenter', () => setHover(z.num));
+    b.addEventListener('pointerleave', () => setHover(0));
+    labelsEl.appendChild(b);
+    pins.push({ el: b, pos: [w[0], g.label[2], w[1]], zone: z, minor: !!z.minor });
+  }
+}
+// ordre de priorité quand deux étiquettes se chevauchent (la moins prioritaire est masquée)
+const PIN_RANK = { 'pleniere': 2, 'parcours-a': 3, 'parcours-b': 3, 'parcours-c': 3, 'agora-piliers': 4, 'agora-ecran': 4, 'accueil': 5, 'cafe': 6, 'robot': 7 };
+function pinRank(p) {
+  if (p.zone && (p.zone.num === selNum || p.zone.num === hoverNum)) return 0;
+  if (p.zone) return PIN_RANK[p.zone.id] || 8;
+  return p.el.classList.contains('is-entry') ? 1 : 9;
+}
+function placeLabels() {
+  const far = cam.dist > 85, placed = [];
+  // les boutons de la maquette comptent comme des zones occupées
+  const mr = mapEl.getBoundingClientRect();
+  for (const n of mapEl.querySelectorAll('.map-tools > *, .map-foot > *')) {
+    const r = n.getBoundingClientRect(); if (r.width) placed.push([r.left - mr.left, r.top - mr.top, r.right - mr.left, r.bottom - mr.top]);
+  }
+  const order = pins.slice().sort((a, b) => pinRank(a) - pinRank(b));
+  for (const p of order) {
+    const q = project(p.pos[0], p.pos[1], p.pos[2]);
+    const keep = (p.zone && (p.zone.num === selNum || p.zone.num === hoverNum)) || (p.badge && p.zoneNum === selNum);
+    if (!q || (p.minor && far && !keep) || q[0] < -60 || q[0] > viewW + 60 || q[1] < -30 || q[1] > viewH + 60) { p.el.style.visibility = 'hidden'; continue; }
+    const X = q[0].toFixed(1) + 'px', Y = q[1].toFixed(1) + 'px';
+    const hits = (r) => placed.some((o) => r[0] < o[2] + 4 && r[2] > o[0] - 4 && r[1] < o[3] + 2 && r[3] > o[1] - 2);
+    if (p.tag) {
+      p.el.style.transform = 'translate(' + X + ',' + Y + ') translate(-50%,-50%)';
+      if (!p.badge) {
+        const w = p.el.offsetWidth, h = p.el.offsetHeight, r = [q[0] - w / 2, q[1] - h / 2, q[0] + w / 2, q[1] + h / 2];
+        if (hits(r) && !p.el.classList.contains('is-entry')) { p.el.style.visibility = 'hidden'; continue; }
+        placed.push(r);
+      }
+    } else {
+      p.el.style.zIndex = String(1000 - Math.round(q[2]));
+      p.el.classList.toggle('is-far', far && !p.el.classList.contains('is-active'));
+      // place l'étiquette au-dessus du point, sinon à droite, à gauche ou en dessous, pour éviter les chevauchements
+      const card = p.el.firstChild, w = card.offsetWidth, hc = card.offsetHeight, x = q[0], y = q[1];
+      const opts = [
+        ['up', [x - w / 2, y - hc - 12, x + w / 2, y], 'translate(-50%,-100%)'],
+        ['right', [x + 8, y - hc / 2, x + 8 + w, y + hc / 2], 'translate(8px,-50%)'],
+        ['left', [x - 8 - w, y - hc / 2, x - 8, y + hc / 2], 'translate(calc(-100% - 8px),-50%)'],
+        ['down', [x - w / 2, y, x + w / 2, y + hc + 12], 'translate(-50%,0)']
+      ];
+      let pick = opts.find((o) => !hits(o[1]));
+      if (!pick) { if (!keep) { p.el.style.visibility = 'hidden'; continue; } pick = opts[0]; }
+      p.el.dataset.side = pick[0];
+      p.el.style.transform = 'translate(' + X + ',' + Y + ') ' + pick[2];
+      placed.push(pick[1]);
+    }
+    p.el.style.visibility = '';
+  }
+}
+
+/* =====================================================================
+   7. INTERACTIONS SUR LA MAQUETTE
+   ===================================================================== */
+function pickZone(px, py) {
+  const { o, d } = rayAt(px, py); let best = null;
+  for (const z of ZONES) {
+    const g = GEO[z.id], pts = g.pts.map(W), hs = g.kind === 'room' ? [g.h, 0.02] : [2.2, 1.0, 0.02];
+    for (const h of hs) {
+      if (Math.abs(d[1]) < 1e-6) continue;
+      const t = (h - o[1]) / d[1]; if (t <= 0) continue;
+      const p = [o[0] + d[0] * t, o[2] + d[2] * t];
+      if (pointInPoly(p, pts) && (!best || t < best.t)) best = { t, z };
+    }
+  }
+  return best ? best.z : null;
+}
+function setHover(n) {
+  if (hoverNum === n) return; hoverNum = n;
+  for (const p of pins) if (p.zone) p.el.classList.toggle('is-hover', p.zone.num === n);
+  document.querySelectorAll('.zone-btn').forEach((b) => b.classList.toggle('is-hover', Number(b.dataset.num) === n));
+  canvas.classList.toggle('is-pointing', n > 0);
+  requestRender();
+}
+
+const pointers = new Map(); let drag = null, pinch = null;
+function canvasXY(e) { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('pointerdown', (e) => {
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* capture facultative */ }
+  pointers.set(e.pointerId, canvasXY(e));
+  if (pointers.size === 1) {
+    drag = { mode: (e.button === 2 || e.shiftKey || e.ctrlKey || e.metaKey) ? 'pan' : 'orbit', start: canvasXY(e), last: canvasXY(e), moved: 0, t: performance.now() };
+  } else if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
+    if (drag) drag.moved = 99;
+  }
+});
+canvas.addEventListener('pointermove', (e) => {
+  const xy = canvasXY(e);
+  if (!pointers.has(e.pointerId)) {
+    if (e.pointerType === 'mouse' && camBasis) { const z = pickZone(xy[0], xy[1]); setHover(z ? z.num : 0); }
+    return;
+  }
+  pointers.set(e.pointerId, xy);
+  if (pointers.size >= 2 && pinch) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a[0] - b[0], a[1] - b[1]), m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    if (d > 10) goal.dist = clamp(goal.dist * pinch.d / d, 18, 320);
+    panBy(m[0] - pinch.m[0], m[1] - pinch.m[1]);
+    pinch = { d, m }; requestRender(); return;
+  }
+  if (!drag) return;
+  const dx = xy[0] - drag.last[0], dy = xy[1] - drag.last[1];
+  drag.moved += Math.abs(dx) + Math.abs(dy); drag.last = xy;
+  if (drag.moved < 4) return;
+  canvas.classList.add('is-dragging');
+  if (drag.mode === 'orbit') {
+    goal.yaw -= dx * 0.0075;
+    goal.pitch = clamp(goal.pitch + dy * 0.006, 0.22, 1.53);
+    syncViewButtons();
+  } else panBy(dx, dy);
+  requestRender();
+});
+function panBy(dx, dy) {
+  const s = 2 * goal.dist * Math.tan(FOV / 2) / viewH;
+  const r = [Math.cos(goal.yaw), -Math.sin(goal.yaw)], fh = [-Math.sin(goal.yaw), -Math.cos(goal.yaw)];
+  const sf = s / Math.max(Math.sin(goal.pitch), 0.35);
+  goal.tx = clamp(goal.tx - r[0] * dx * s + fh[0] * dy * sf, -70, 70);
+  goal.tz = clamp(goal.tz - r[1] * dx * s + fh[1] * dy * sf, -70, 70);
+}
+function endPointer(e) {
+  const had = pointers.has(e.pointerId); pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (!had || !drag) return;
+  if (pointers.size === 1) drag.last = [...pointers.values()][0];
+  if (pointers.size === 0) {
+    const click = drag.moved < 6 && performance.now() - drag.t < 600 && e.type === 'pointerup';
+    canvas.classList.remove('is-dragging');
+    if (click) {
+      const xy = canvasXY(e); const z = pickZone(xy[0], xy[1]);
+      if (z) selectZone(z.id, true); else if (selNum) clearSelection(false, false, true);
+    }
+    drag = null;
+  }
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && !pointers.size) setHover(0); });
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  goal.dist = clamp(goal.dist * Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), 18, 320);
+  requestRender();
+}, { passive: false });
+canvas.addEventListener('keydown', (e) => {
+  const k = e.key; let used = true;
+  if (k === 'ArrowLeft' && e.shiftKey) panBy(40, 0);
+  else if (k === 'ArrowRight' && e.shiftKey) panBy(-40, 0);
+  else if (k === 'ArrowUp' && e.shiftKey) panBy(0, 40);
+  else if (k === 'ArrowDown' && e.shiftKey) panBy(0, -40);
+  else if (k === 'ArrowLeft') goal.yaw += 0.15;
+  else if (k === 'ArrowRight') goal.yaw -= 0.15;
+  else if (k === 'ArrowUp') goal.pitch = clamp(goal.pitch + 0.1, 0.22, 1.53);
+  else if (k === 'ArrowDown') goal.pitch = clamp(goal.pitch - 0.1, 0.22, 1.53);
+  else if (k === '+' || k === '=') goal.dist = clamp(goal.dist * 0.82, 18, 320);
+  else if (k === '-' || k === '_') goal.dist = clamp(goal.dist * 1.22, 18, 320);
+  else used = false;
+  if (used) { e.preventDefault(); syncViewButtons(); requestRender(); }
+});
+
+let topView = false;
+function syncViewButtons() {
+  const top = goal.pitch > 1.45; topView = top;
+  $('#v3d').setAttribute('aria-pressed', String(!top)); $('#vtop').setAttribute('aria-pressed', String(top));
+}
+function switchView(top) {
+  topView = top;
+  if (selNum) { const g = zoneGoal(ZONES[selNum - 1]); if (top) g.yaw = HOME_YAW; setGoal(g); }
+  else setGoal(homeGoal(top));
+  syncViewButtons();
+}
+$('#v3d').addEventListener('click', () => switchView(false));
+$('#vtop').addEventListener('click', () => switchView(true));
+$('#zin').addEventListener('click', () => setGoal({ dist: clamp(goal.dist * 0.75, 18, 320) }));
+$('#zout').addEventListener('click', () => setGoal({ dist: clamp(goal.dist * 1.33, 18, 320) }));
+$('#home').addEventListener('click', () => { setGoal(homeGoal(topView)); });
+if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) $('#hint').textContent = 'Glisser : pivoter · Deux doigts : zoomer et déplacer';
+
+/* =====================================================================
+   8. PANNEAU : ESPACES, PROGRAMME, DÉTAIL
+   ===================================================================== */
+const viewEsp = $('#view-espaces'), viewProg = $('#view-programme'), viewDet = $('#view-detail');
+let activeTab = 'espaces', progFilter = 'tous', lastFocus = null;
+
+const fmtT = (t) => { const [h, m] = t.split(':'); return Number(h) + 'h' + (m === '00' ? '' : m); };
+const fmtR = (a, b) => fmtT(a) + '–' + fmtT(b);
+const progFor = (id) => PROGRAMME.filter((p) => p.zones && p.zones.includes(id));
+function dotFor(niveau) { const d = el('span', 'dot'); d.style.setProperty('--z', 'var(' + NIVEAUX[niveau].couleur + ')'); return d; }
+function placeChip(p) {
+  const id = p.zones[0], z = zoneById[id];
+  const w = el('button', 's-where'); w.type = 'button'; w.style.setProperty('--z', 'var(' + NIVEAUX[p.niveau].couleur + ')');
+  w.appendChild(el('span', 'dot')); w.appendChild(document.createTextNode(p.lieu));
+  w.setAttribute('aria-label', 'Voir ' + p.lieu + ' sur le plan');
+  w.addEventListener('click', () => selectZone(z.id, true));
+  return w;
+}
+const ICON_CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+function renderZoneList() {
+  viewEsp.textContent = '';
+  // aide au choix du parcours
+  const box = el('section', 'choose'); box.setAttribute('aria-labelledby', 'choose-title');
+  const h = el('h2', 'choose-title', 'Quel parcours choisir ?'); h.id = 'choose-title'; box.appendChild(h);
+  for (const k of ['a', 'b', 'c']) {
+    const n = NIVEAUX[k], b = el('button', 'choose-row'); b.type = 'button';
+    b.appendChild(dotFor(k));
+    const t = el('span', 'choose-txt');
+    t.appendChild(el('span', 'choose-if', 'Si je viens : ' + n.si));
+    t.appendChild(el('span', 'choose-then', n.parcours + ' · ' + n.nom));
+    b.appendChild(t);
+    const ic = el('span', 'choose-go'); ic.innerHTML = ICON_CHEVRON; b.appendChild(ic);
+    b.addEventListener('click', () => selectZone(n.zone, true));
+    box.appendChild(b);
+  }
+  viewEsp.appendChild(box);
+
+  let group = null, ul = null;
+  for (const z of ZONES) {
+    if (z.groupe !== group) {
+      group = z.groupe; viewEsp.appendChild(el('h2', 'group-label', group));
+      ul = el('ul', 'zone-list'); viewEsp.appendChild(ul);
+    }
+    const li = el('li'), b = el('button', 'zone-btn'); b.type = 'button'; b.dataset.num = z.num;
+    b.style.setProperty('--z', 'var(' + z.couleur + ')');
+    b.appendChild(el('span', 'dot'));
+    const t = el('span', 'zone-txt'); t.appendChild(el('span', 'zone-name', z.nom));
+    const lvl = z.niveau !== 'commun' ? ' · ' + NIVEAUX[z.niveau].nom : '';
+    t.appendChild(el('span', 'zone-sub', z.sous + lvl));
+    b.appendChild(t);
+    const when = progFor(z.id).map((p) => fmtT(p.debut)).join(' · ');
+    b.appendChild(el('span', 'zone-count', when));
+    b.addEventListener('click', () => selectZone(z.id, true));
+    b.addEventListener('mouseenter', () => setHover(z.num)); b.addEventListener('mouseleave', () => setHover(0));
+    li.appendChild(b); ul.appendChild(li);
+  }
+}
+
+function itemsList(items) {
+  const ul = el('ul', 'sub-items');
+  for (const it of items) {
+    const li = el('li', 'sub-item');
+    li.appendChild(el('span', 'sub-dur', it.duree || ''));
+    const b = el('div', 'sub-body'); b.appendChild(el('span', 'sub-title', it.titre));
+    if (it.texte) b.appendChild(el('span', 'sub-text', it.texte));
+    if (it.qui) b.appendChild(el('span', 's-who', it.qui));
+    li.appendChild(b); ul.appendChild(li);
+  }
+  return ul;
+}
+
+function renderProgramme() {
+  viewProg.textContent = '';
+  const filters = el('div', 'filters'); filters.setAttribute('role', 'group'); filters.setAttribute('aria-label', 'Afficher le programme');
+  const opts = [{ id: 'tous', nom: 'Toute la journée' }].concat(['a', 'b', 'c'].map((k) => ({ id: k, nom: NIVEAUX[k].parcours, niveau: k })));
+  for (const o of opts) {
+    const c = el('button', 'chip'); c.type = 'button'; c.setAttribute('aria-pressed', String(progFilter === o.id));
+    if (o.niveau) c.appendChild(dotFor(o.niveau));
+    c.appendChild(document.createTextNode(o.nom));
+    c.addEventListener('click', () => { progFilter = o.id; renderProgramme(); });
+    filters.appendChild(c);
+  }
+  viewProg.appendChild(filters);
+
+  // regroupe les séquences par créneau horaire
+  const slots = [];
+  for (const p of PROGRAMME) {
+    const last = slots[slots.length - 1];
+    if (last && last.debut === p.debut && last.fin === p.fin) last.list.push(p); else slots.push({ debut: p.debut, fin: p.fin, list: [p] });
+  }
+  const ol = el('ol', 'slots');
+  for (const s of slots) {
+    const list = s.list.filter((p) => progFilter === 'tous' || p.niveau === 'commun' || p.pause || p.niveau === progFilter);
+    if (!list.length) continue;
+    const li = el('li', 'slot' + (list[0].pause ? ' is-pause' : ''));
+    li.appendChild(el('span', 'slot-time', fmtR(s.debut, s.fin)));
+    const body = el('div', 'slot-body');
+    if (list[0].pause) {
+      body.appendChild(el('span', 'slot-title', list[0].titre));
+    } else if (list.length > 1) {
+      body.appendChild(el('span', 'slot-title', 'Parcours au choix'));
+      for (const p of list) {
+        const n = NIVEAUX[p.niveau], tr = el('button', 'track'); tr.type = 'button';
+        tr.style.setProperty('--z', 'var(' + n.couleur + ')');
+        const hd = el('span', 'track-head'); hd.appendChild(el('span', 'dot')); hd.appendChild(document.createTextNode(n.parcours + ' · ' + n.nom));
+        tr.appendChild(hd); tr.appendChild(el('span', 'track-title', p.titre)); tr.appendChild(el('span', 'track-where', p.lieu));
+        tr.setAttribute('aria-label', n.parcours + ', ' + p.titre + ', ' + p.lieu + ' : voir sur le plan');
+        tr.addEventListener('click', () => selectZone(p.zones[0], true));
+        body.appendChild(tr);
+      }
+    } else {
+      const p = list[0];
+      body.appendChild(el('span', 'slot-title', p.titre));
+      if (p.niveau !== 'commun') body.appendChild(el('span', 's-who', NIVEAUX[p.niveau].parcours + ' · ' + NIVEAUX[p.niveau].nom));
+      if (p.texte) body.appendChild(el('span', 'sub-text', p.texte));
+      if (p.items) body.appendChild(itemsList(p.items));
+      if (p.zones) body.appendChild(placeChip(p));
+    }
+    li.appendChild(body); ol.appendChild(li);
+  }
+  viewProg.appendChild(ol);
+}
+
+function setTab(name, focus) {
+  activeTab = name;
+  const isE = name === 'espaces';
+  $('#tab-espaces').setAttribute('aria-selected', String(isE)); $('#tab-programme').setAttribute('aria-selected', String(!isE));
+  $('#tab-espaces').tabIndex = isE ? 0 : -1; $('#tab-programme').tabIndex = isE ? -1 : 0;
+  viewDet.hidden = true; viewEsp.hidden = !isE; viewProg.hidden = isE;
+  if (focus) (isE ? $('#tab-espaces') : $('#tab-programme')).focus();
+}
+$('#tab-espaces').addEventListener('click', () => { clearSelection(false); setTab('espaces'); });
+$('#tab-programme').addEventListener('click', () => { clearSelection(false); setTab('programme'); });
+$('.tabs').addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); setTab(activeTab === 'espaces' ? 'programme' : 'espaces', true); }
+});
+
+const ICON_ROUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>';
+const ICON_FOCUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+const ICON_DOC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+
+function renderDetail(z) {
+  viewDet.textContent = '';
+  const back = el('button', 'back'); back.type = 'button';
+  back.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
+  back.appendChild(document.createTextNode(activeTab === 'programme' ? 'Retour au programme' : 'Tous les espaces'));
+  back.addEventListener('click', () => clearSelection(true, true));
+  viewDet.appendChild(back);
+
+  const d = el('div', 'detail'); d.style.setProperty('--z', 'var(' + z.couleur + ')');
+  const head = el('div', 'detail-head');
+  const tags = el('div', 'tags');
+  const tg = el('span', 'tag'); tg.appendChild(el('span', 'dot')); tg.appendChild(document.createTextNode(NIVEAUX[z.niveau].nom)); tags.appendChild(tg);
+  const tp = el('span', 'tag is-plain', z.sous); tags.appendChild(tp);
+  head.appendChild(tags);
+  const h = el('h2', null, z.nom); h.id = 'detail-title'; h.tabIndex = -1; head.appendChild(h);
+  d.appendChild(head);
+  if (z.description) d.appendChild(el('p', null, z.description));
+
+  const acts = el('div', 'actions');
+  const route = el('button', 'btn'); route.type = 'button'; route.innerHTML = ICON_ROUTE; route.appendChild(document.createTextNode('Itinéraire depuis l’entrée'));
+  route.setAttribute('aria-pressed', String(pathOn));
+  route.addEventListener('click', () => { pathOn = !pathOn; route.setAttribute('aria-pressed', String(pathOn)); buildPath(); requestRender(); });
+  const focus = el('button', 'btn'); focus.type = 'button'; focus.innerHTML = ICON_FOCUS; focus.appendChild(document.createTextNode('Centrer'));
+  focus.addEventListener('click', () => setGoal(zoneGoal(z)));
+  acts.appendChild(route); acts.appendChild(focus); d.appendChild(acts);
+
+  for (const p of progFor(z.id)) {
+    const blk = el('section', 'block');
+    blk.appendChild(el('h3', null, fmtR(p.debut, p.fin) + (p.lieu && p.lieu !== z.sous ? ' · ' + p.lieu : '')));
+    blk.appendChild(el('p', 'block-title', p.titre));
+    if (p.texte) blk.appendChild(el('p', null, p.texte));
+    if (p.points) { const ul = el('ul', 'points'); for (const t of p.points) ul.appendChild(el('li', null, t)); blk.appendChild(ul); }
+    if (p.format) blk.appendChild(el('p', 'muted', p.format));
+    if (p.items) blk.appendChild(itemsList(p.items));
+    if (p.public) {
+      const q = el('div', 'quote'); q.style.setProperty('--z', 'var(' + NIVEAUX[p.niveau].couleur + ')');
+      q.appendChild(el('span', 'quote-label', 'Ce parcours est fait pour moi si…'));
+      q.appendChild(el('span', null, '« ' + p.public + ' »'));
+      blk.appendChild(q);
+    }
+    if (p.equipe) { const ul = el('ul', 'team'); for (const t of p.equipe) ul.appendChild(el('li', null, t)); blk.appendChild(ul); }
+    if (p.cr) { const c = el('p', 'cr'); c.innerHTML = ICON_DOC; c.appendChild(document.createTextNode('Compte rendu au format PPT généré par IA')); blk.appendChild(c); }
+    d.appendChild(blk);
+  }
+
+  if (z.stands) {
+    const blk = el('section', 'block');
+    blk.appendChild(el('h3', null, 'Stands'));
+    const ul = el('ul', 'stand-list');
+    for (const s of z.stands) {
+      const li = el('li', 'stand'); li.style.setProperty('--z', 'var(' + NIVEAUX[s.niveau].couleur + ')');
+      const top = el('span', 'stand-top'); top.appendChild(el('span', 'dot')); top.appendChild(el('b', null, s.n === 'Café' ? 'Stand café' : 'Stand ' + s.n));
+      li.appendChild(top);
+      li.appendChild(el('span', null, s.niveau === 'commun' ? s.theme : NIVEAUX[s.niveau].nom + ' · ' + s.theme));
+      ul.appendChild(li);
+    }
+    blk.appendChild(ul); d.appendChild(blk);
+  }
+  viewDet.appendChild(d);
+}
+
+function selectZone(id, moveCamera) {
+  const z = zoneById[id]; if (!z) return;
+  const act = document.activeElement;
+  const fromUi = act && act !== document.body && ($('.panel').contains(act) || act.classList.contains('pin'));
+  if (selNum !== z.num) lastFocus = act;
+  selNum = z.num;
+  for (const p of pins) if (p.zone) { p.el.classList.toggle('is-active', p.zone.num === selNum); p.el.classList.toggle('is-dim', p.zone.num !== selNum); }
+  document.querySelectorAll('.zone-btn').forEach((b) => b.setAttribute('aria-current', String(Number(b.dataset.num) === selNum)));
+  renderDetail(z);
+  viewEsp.hidden = true; viewProg.hidden = true; viewDet.hidden = false;
+  $('#panel-body').scrollTop = 0;
+  if (fromUi) { const h = $('#detail-title'); if (h) h.focus({ preventScroll: true }); }
+  buildPath();
+  if (moveCamera) setGoal(zoneGoal(z)); else requestRender();
+  $('#live').textContent = z.nom + ', ' + z.sous + ' sélectionné.';
+  if (location.hash !== '#' + id) { try { history.replaceState(null, '', '#' + id); } catch (e) { location.hash = id; } }
+}
+function clearSelection(restoreFocus, toList, stayInPlace) {
+  if (!selNum && !toList) return;
+  selNum = 0;
+  for (const p of pins) if (p.zone) p.el.classList.remove('is-active', 'is-dim');
+  document.querySelectorAll('.zone-btn').forEach((b) => b.setAttribute('aria-current', 'false'));
+  buildPath();
+  viewDet.hidden = true; viewEsp.hidden = activeTab !== 'espaces'; viewProg.hidden = activeTab !== 'programme';
+  if (location.hash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* hash conservé */ } }
+  if (restoreFocus && lastFocus && document.body.contains(lastFocus) && !lastFocus.closest('[hidden]')) lastFocus.focus();
+  if (gl && progs && !stayInPlace) setGoal(homeGoal(topView)); else requestRender();
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && selNum) clearSelection(true, true); });
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (zoneById[id]) selectZone(id, true); });
+
+/* =====================================================================
+   9. DÉMARRAGE
+   ===================================================================== */
+$('#ev-name').textContent = EVENEMENT.nom;
+$('#ev-meta').textContent = EVENEMENT.date + ' · ' + EVENEMENT.lieu;
+renderZoneList(); renderProgramme();
+
+function resize() {
+  const r = mapEl.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  viewW = Math.max(1, r.width); viewH = Math.max(1, r.height);
+  canvas.width = Math.round(viewW * dpr); canvas.height = Math.round(viewH * dpr);
+  requestRender();
+}
+
+if (!gl) {
+  const f = el('div', 'fallback', 'La vue 3D nécessite WebGL, qui n’est pas disponible sur cet appareil. La liste des espaces et le programme restent consultables.');
+  mapEl.appendChild(f); canvas.hidden = true; $('.map-tools').hidden = true;
+} else {
+  try {
+    progs = { mesh: compile(VS, FS), line: compile(LVS, FS), path: compile(PVS, PFS) };
+  } catch (err) {
+    console.error(err); progs = null;
+    mapEl.appendChild(el('div', 'fallback', 'La vue 3D n’a pas pu démarrer sur cet appareil. La liste des espaces et le programme restent consultables.'));
+    canvas.hidden = true; $('.map-tools').hidden = true;
+    return;
+  }
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(mapEl); else window.addEventListener('resize', resize);
+  uploadScene();
+  buildLabels();
+  const home = homeGoal(false);
+  const startId = location.hash.slice(1);
+  if (zoneById[startId]) { setGoal(home, true); selectZone(startId, true); }
+  else if (reduceMotion) setGoal(home, true);
+  else { setGoal(Object.assign({}, home, { yaw: home.yaw + 0.5, dist: home.dist * 1.35, pitch: 1.2 }), true); setGoal(home); }
+  const mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  if (mq && mq.addEventListener) mq.addEventListener('change', uploadScene);
+  new MutationObserver(uploadScene).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  canvas.addEventListener('webglcontextlost', (e) => e.preventDefault());
+}
+})();
+</script>
+</body>
+</html>

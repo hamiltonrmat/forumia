@@ -15,7 +15,7 @@
     var seqs = D.sequences.filter(function (s) { return s.creneau === c.id; });
     var lieux = seqs.map(function (s) { return F.lieu(s.lieu); })
       .filter(function (l, i, a) { return a.indexOf(l) === i; });
-    var detail = c.id === "parcours" ? "Salles 1, 2 et 3" : lieux.join(", ");
+    var detail = c.id === "parcours" ? "Salles 1006/1007, 1005 et Espace écran dans le hall" : lieux.join(", ");
     return '<li class="' + (c.id === "parcours" ? "split" : "") + '">' +
       '<span class="t">' + F.heure(c.debut) + "</span>" +
       '<span class="n">' + esc(c.titre) + "</span>" +
@@ -37,10 +37,26 @@
       "</a>";
   }).join("");
 
+  // Aperçu des stands pour l'Agora de l'IA
+  var agoraSeq = F.seq("agora");
+  if (agoraSeq && agoraSeq.stands) {
+    document.getElementById("stands-overview").innerHTML = agoraSeq.stands.map(function (st, i) {
+      var p = D.parcours[st.niveau];
+      var num = (st.numero < 10 ? "0" : "") + st.numero;
+      return '<div class="stand-card reveal" style="transition-delay:' + i * 60 + 'ms" data-niveau="' + (st.niveau || "") + '">' +
+        '<span class="stand-num">' + num + "</span>" +
+        (p ? '<span class="stand-level"><span class="dot" aria-hidden="true"></span>' + esc(p.nom) + "</span>" : "") +
+        '<h3>Stand ' + st.numero + "</h3>" +
+        '<p>' + esc(st.titre) + "</p>" +
+        (st.description ? '<p class="muted">' + esc(st.description) + "</p>" : "") +
+        "</div>";
+    }).join("");
+  }
+
   // Infos pratiques
   document.getElementById("infos-grid").innerHTML = [
     ["Accueil", "Café d’accueil et enregistrement dès " + F.heure(D.creneaux[0].debut) + ", dans le " + F.lieu("hall").toLowerCase() + "."],
-    ["Lieu", ev.lieu + ". Plénière, salles 1 à 3 et stands sont regroupés sur le même site."],
+    ["Lieu", ev.lieu + ". Plénière, salles 1006/1007, 1005, espace écran dans le hall et stands sont regroupés sur le même site."],
     ["Contact", ev.contact + "."]
   ].map(function (b) { return "<div><h3>" + b[0] + "</h3><p>" + esc(b[1]) + "</p></div>"; }).join("");
 })();

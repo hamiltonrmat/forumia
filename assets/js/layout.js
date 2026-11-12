@@ -66,6 +66,8 @@
     { id: "programme", label: "Programme", href: root + "programme.html" },
     { id: "parcours", label: "Parcours", href: root + "index.html#parcours" },
     { id: "agora", label: "Agora IA", href: seqUrl("agora") },
+    { id: "plan", label: "Plan interactif", href: root + "plan-3d.html" },
+    { id: "mannele", label: "Le Mannele", href: root + "mannele.html" },
     { id: "infos", label: "Infos pratiques", href: root + "index.html#infos" }
   ];
 

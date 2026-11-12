@@ -18,45 +18,45 @@ window.FORUM = {
   },
 
   lieux: {
-    hall:     { nom: "Hall d’entrée",  role: "Accueil, café, stands" },
-    pleniere: { nom: "Salle plénière", role: "Ouverture et clôture" },
-    salle1:   { nom: "Salle 1",        role: "Parcours A" },
-    salle2:   { nom: "Salle 2",        role: "Parcours B" },
-    salle3:   { nom: "Salle 3",        role: "Parcours C" }
+    hall:       { nom: "Hall d’entrée",  role: "Accueil, café, stands, Agora de l'IA" },
+    pleniere:   { nom: "Salle plénière", role: "Ouverture et clôture" },
+    salleA:     { nom: "Salle 1006/1007", role: "Parcours A : Je découvre" },
+    salleB:     { nom: "Salle 1005",      role: "Parcours B : Je m’inspire" },
+    espaceHall: { nom: "Espace écran dans le hall", role: "Parcours C : Je me projette" }
   },
 
   parcours: {
     A: {
       nom: "Je découvre",
-      niveau: "Niveau débutant : on découvre",
+      niveau: "Pas d’IA",
       profil: "Je suis débutant en IA et j’ai envie de l’explorer davantage.",
-      format: "Exposé & mini-scène",
-      lieu: "salle1",
+      format: "3 situations : Scène → Débat → Apport théorique + conclusion participative",
+      lieu: "salleA",
       page: "parcours-a"
     },
     B: {
-      nom: "J’explore",
-      niveau: "Niveau intermédiaire : on explore",
-      profil: "Je connais l’IA, j’ai envie de l’intégrer dans mon métier mais j’ai besoin de voir des cas pratiques et des témoignages concrets au sein de la Collectivité.",
-      format: "Table ronde",
-      lieu: "salle2",
+      nom: "Je m’inspire",
+      niveau: "Le présent : on le fait déjà",
+      profil: "Je connais l’IA, j’ai envie de l’intégrer dans ma mission mais je souhaiterais voir des cas pratiques, témoignages concrets existants dans la Collectivité.",
+      format: "Table ronde : l’IA dans la CeA",
+      lieu: "salleB",
       page: "parcours-b"
     },
     C: {
-      nom: "Je m’inspire",
+      nom: "Je me projette",
       niveau: "Le futur : vers où aller",
-      profil: "J’ai confiance dans l’IA, je veux aller plus loin et voir des applications métier inspirantes.",
-      format: "Démonstrations & témoignages",
-      lieu: "salle3",
+      profil: "J’ai confiance dans l’IA, je veux me projeter et exploiter de nouvelles possibilités.",
+      format: "L’émission du futur : Simuler (Voir avant d’agir) · Anticiper (Agir avant que le problème n’arrive) · Augmenter (Des agents aux nouvelles capacités)",
+      lieu: "espaceHall",
       page: "parcours-c"
     }
   },
 
   creneaux: [
-    { id: "accueil",    debut: "08:30", fin: "09:00", titre: "Accueil" },
+    { id: "accueil",    debut: "08:30", fin: "09:00", titre: "Accueil café & enregistrement" },
     { id: "ouverture",  debut: "09:00", fin: "10:00", titre: "Plénière d’ouverture" },
-    { id: "transition", debut: "10:00", fin: "10:15", titre: "Changement de salle", pause: true },
-    { id: "parcours",   debut: "10:15", fin: "11:00", titre: "Trois parcours au choix" },
+    { id: "transition", debut: "10:00", fin: "10:10", titre: "Changement de salle", pause: true },
+    { id: "parcours",   debut: "10:10", fin: "11:00", titre: "Trois parcours au choix" },
     { id: "agora",      debut: "11:00", fin: "12:00", titre: "L’Agora de l’IA" },
     { id: "cloture",    debut: "12:00", fin: "12:30", titre: "Plénière de clôture" }
   ],
@@ -70,93 +70,94 @@ window.FORUM = {
       intervenants: []
     },
     {
-      id: "introduction", creneau: "ouverture", debut: "09:00", fin: "09:10", lieu: "pleniere",
-      titre: "Introduction — vision stratégique IA",
-      sousTitre: "Les enjeux de l’IA pour la CeA : dimension interne et usager.",
-      resume: "Ouverture officielle du forum et présentation de la vision stratégique de la Collectivité en matière d’IA.",
+      id: "mot-bienvenue", creneau: "ouverture", debut: "09:00", fin: "09:05", lieu: "pleniere",
+      titre: "Mot de bienvenue",
+      sousTitre: "L’ambition de la CeA en termes d’IA : Proximité, Efficacité et Simplicité",
+      resume: "Ouverture officielle du forum par Gabriel GALLAND et un·e élu·e.",
       intervenants: [
         { nom: "Gabriel GALLAND" },
         { nom: "Élu·e", role: "à confirmer" }
       ]
     },
     {
-      id: "ia-exemples", creneau: "ouverture", debut: "09:10", fin: "09:45", lieu: "pleniere",
+      id: "ia-de-quoi-parle-t-on", creneau: "ouverture", debut: "09:05", fin: "09:55", lieu: "pleniere",
       titre: "IA : de quoi parle-t-on ?",
-      sousTitre: "En quelques exemples.",
+      sousTitre: "Le délégué à l’IA CeA interroge un expert reconnu sur le sujet",
       resume: "Une introduction accessible à l’intelligence artificielle, illustrée par des exemples concrets.",
       intervenants: [
         { nom: "Hamilton DE ARAUJO" },
-        { nom: "Expert IA externe", role: "à confirmer, capacité de vulgarisation" }
+        { nom: "Germain FORESTIER (UHA)", role: "Expert IA" }
       ]
     },
     {
-      id: "deroule", creneau: "ouverture", debut: "09:45", fin: "10:00", lieu: "pleniere",
-      titre: "Déroulé de la matinée",
-      resume: "Présentation des trois parcours et des salles pour que chacun choisisse le sien.",
+      id: "deroule", creneau: "ouverture", debut: "09:55", fin: "10:00", lieu: "pleniere",
+      titre: "Déroulé de la journée",
+      resume: "Présentation du programme de la matinée.",
       intervenants: [{ nom: "Hamilton DE ARAUJO" }]
     },
     {
-      id: "parcours-a", creneau: "parcours", parcours: "A", debut: "10:15", fin: "11:00", lieu: "salle1",
-      titre: "Je découvre",
-      sousTitre: "« Chapeau de Bonneau » : l’IA, l’utilisateur lambda, le mauvais utilisateur.",
-      resume: "Une mini-scène pour démarrer, suivie d’un débrief utile, puis 10 minutes de questions et de démonstration.",
+      id: "parcours-a", creneau: "parcours", parcours: "A", debut: "10:10", fin: "11:00", lieu: "salleA",
+      titre: "Le SAV de l’IA",
+      sousTitre: "Découvrir et comprendre les principaux sujets liés à l’utilisation de l’IA générative",
+      resume: "3 situations sous format : Scène → Débat → Apport théorique, suivies d’une conclusion participative avec le public.",
       intervenants: [
-        { nom: "David LAGUERRE", role: "Animation" },
         { nom: "Pierre GRAEF", role: "Animation" },
-        { nom: "Emilie DISSARD", role: "Animation" }
+        { nom: "Emilie D", role: "IA" },
+        { nom: "Benoit F", role: "SAV" }
       ],
-      livrable: "Compte rendu au format PPT généré par IA"
+      livrable: "CR en format PPT généré par IA"
     },
     {
-      id: "parcours-b", creneau: "parcours", parcours: "B", debut: "10:15", fin: "11:00", lieu: "salle2",
-      titre: "J’explore",
-      sousTitre: "Table ronde : l’IA dans la CeA.",
-      resume: "Trois profils d’agents témoignent de leurs usages réels de l’IA, du quotidien aux usages avancés.",
+      id: "parcours-b", creneau: "parcours", parcours: "B", debut: "10:10", fin: "11:00", lieu: "salleB",
+      titre: "Table ronde - l’IA dans la CeA",
+      sousTitre: "Échanges avec des agents utilisant déjà l’IA dans leur métier",
+      resume: "Agent bien à l’aise avec l’IA générative pour des tâches quotidiennes (Licences Copilot) · Projet OCR Solidarités · Une IA a produit presque une de nos applications (DSIN).",
       intervenants: [
         { nom: "Hamilton DE ARAUJO", role: "Médiation" },
-        { nom: "Intervenant 1", role: "Agent à l’aise avec l’IA générative pour des tâches quotidiennes" },
-        { nom: "Lucas DELAGREE", role: "Référent TNS / OCR" },
-        { nom: "Intervenant 3", role: "Utilisateur avancé : COM / DSI" }
+        { nom: "Lucas DELAGREE" },
+        { nom: "Romain WIESER" }
       ],
-      livrable: "Compte rendu au format PPT généré par IA"
+      livrable: "CR en format PPT généré par IA"
     },
     {
-      id: "parcours-c", creneau: "parcours", parcours: "C", debut: "10:15", fin: "11:00", lieu: "salle3",
-      titre: "Je m’inspire",
-      sousTitre: "Démonstrations & témoignages.",
-      resume: "Trois démonstrations en direct : un outil simple à effet « wow », un outil métier à vraie valeur ajoutée, un outil qui fait rêver.",
-      intervenants: [{ nom: "Gabriel GALLAND", role: "Médiation" }]
+      id: "parcours-c", creneau: "parcours", parcours: "C", debut: "10:10", fin: "11:00", lieu: "espaceHall",
+      titre: "L’émission du futur",
+      sousTitre: "Trois visions du service public alsacien de 2030",
+      resume: "Simuler (Voir avant d’agir) · Anticiper (Agir avant que le problème n’arrive) · Augmenter (Des agents aux nouvelles capacités).",
+      intervenants: [
+        { nom: "Gabriel GALLAND ou Stéphanie MENIGOZ", role: "Médiation" }
+      ]
     },
     {
       id: "agora", creneau: "agora", debut: "11:00", fin: "12:00", lieu: "hall",
       titre: "L’Agora de l’IA",
-      sousTitre: "Échanges, ateliers et démonstrations.",
+      sousTitre: "Séquence libre : ateliers, démonstrations et échanges autour d’un café",
       lien: "L’Agora de l’IA : échanges, ateliers et démonstrations",
-      resume: "Chacun circule librement entre sept stands de démonstration et d’échange, quel que soit son parcours de 10h15.",
+      resume: "Séquence libre dans le hall d’entrée (indépendante du choix de parcours). Ateliers, démonstrations et échanges autour d’un café.",
       intervenants: [],
-      // niveau : "A" Je découvre · "B" J'explore · "C" Je m'inspire (donne la couleur du stand)
-      // Répartition provisoire, à ajuster.
       stands: [
-        { numero: 1, niveau: "A", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 2, niveau: "A", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 3, niveau: "B", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 4, niveau: "B", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 5, niveau: "B", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 6, niveau: "C", titre: "Thème à définir", animateur: "À confirmer", description: "" },
-        { numero: 7, niveau: "C", titre: "Thème à définir", animateur: "À confirmer", description: "" }
+        { numero: 1, niveau: "A", titre: "À définir", animateur: "À confirmer", description: "Stand pour les débutants en IA" },
+        { numero: 2, niveau: "A", titre: "À définir", animateur: "À confirmer", description: "Stand pour les débutants en IA" },
+        { numero: 3, niveau: "B", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent s’inspirer" },
+        { numero: 4, niveau: "B", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent s’inspirer" },
+        { numero: 5, niveau: "B", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent s’inspirer" },
+        { numero: 6, niveau: "C", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent se projeter" },
+        { numero: 7, niveau: "C", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent se projeter" },
+        { numero: 8, titre: "Stand Café", animateur: "", description: "Espace détente et échanges informels" }
       ]
     },
     {
       id: "adoptez-ia", creneau: "cloture", debut: "12:00", fin: "12:20", lieu: "pleniere",
       titre: "Adoptez l’IA dans votre quotidien",
-      resume: "Des repères concrets pour utiliser l’IA dès demain dans son travail.",
+      sousTitre: "Les outils et ressources de la CeA",
+      resume: "Des repères concrets pour utiliser l’IA dès demain dans son travail, avec les outils et ressources disponibles au sein de la Collectivité.",
       intervenants: [{ nom: "Hamilton DE ARAUJO" }]
     },
     {
       id: "mot-de-fin", creneau: "cloture", debut: "12:20", fin: "12:30", lieu: "pleniere",
       titre: "Mot de fin",
-      sousTitre: "Ambition et prochaines actions en matière d’IA.",
-      resume: "Clôture du forum : l’ambition de la Collectivité et les prochaines étapes.",
+      sousTitre: "Ambition et prochaines actions en matière d’IA",
+      resume: "Clôture du forum : retour sur l’ambition de la Collectivité en termes d’IA (Proximité, Efficacité, Simplicité) et présentation des prochaines actions.",
       intervenants: [{ nom: "Gabriel GALLAND" }]
     }
   ]
