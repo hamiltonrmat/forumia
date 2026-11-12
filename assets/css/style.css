@@ -56,6 +56,30 @@
     color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #141412;
+  --surface: #1c1b19;
+  --surface-2: #24231f;
+  --ink: #f1eee7;
+  --ink-2: #c9c4b9;
+  --muted: #8f8a80;
+  --line: #2f2d29;
+  --line-strong: #45423b;
+  --accent: #e0697a;
+  --accent-soft: #3a2125;
+  --pA: #f08a98;
+  --pB: #e6c14f;
+  --pC: #6fca94;
+  --pX: #82aeea;
+  --pA-soft: #3a2126;
+  --pB-soft: #332d14;
+  --pC-soft: #1a2e22;
+  --pX-soft: #1c2638;
+  --todo: #33301f;
+  --todo-line: #7d6a2c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -125,6 +149,30 @@ p { margin: 0 0 1em; }
   .site-nav a[aria-current="page"] { border-bottom-color: var(--line); color: var(--accent); }
   .nav-open .site-nav { display: flex; }
 }
+
+/* ---------- Bouton vue claire / vue sombre (assets/js/theme.js) ---------- */
+.site-nav { margin-left: auto; }
+.theme-toggle {
+  display: inline-grid; place-items: center; flex: none;
+  width: 2.25rem; height: 2.25rem; margin-left: 1.75rem; padding: 0;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: none; color: var(--ink-2); cursor: pointer;
+  transition: color .2s, border-color .2s, transform .3s;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--ink); transform: rotate(-12deg); }
+.theme-toggle svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle .i-soleil { display: none; }
+:root[data-theme="dark"] .theme-toggle .i-soleil { display: block; }
+:root[data-theme="dark"] .theme-toggle .i-lune { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .i-soleil { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .i-lune { display: none; }
+}
+@media (max-width: 760px) {
+  .nav-toggle { margin-left: auto; }
+  .theme-toggle { margin-left: .6rem; }
+}
+@media print { .theme-toggle { display: none !important; } }
 
 /* ---------- Pied de page ---------- */
 .site-footer { border-top: 1px solid var(--line); margin-top: 6rem; padding: 3rem 0 4rem; color: var(--muted); font-size: .9rem; }

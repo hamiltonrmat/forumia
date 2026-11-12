@@ -93,7 +93,9 @@
             return '<a href="' + n.href + '"' + (n.id === page ? ' aria-current="page"' : "") + ">" + esc(n.label) + "</a>";
           }).join("") +
         "</nav>" +
+        (window.ForumTheme ? window.ForumTheme.bouton : "") +
       "</div>";
+    if (window.ForumTheme) window.ForumTheme.maj();
     var toggle = header.querySelector(".nav-toggle");
     toggle.addEventListener("click", function () {
       var open = toggle.getAttribute("aria-expanded") === "true";

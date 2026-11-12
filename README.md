@@ -21,6 +21,7 @@ Ouvrir `index.html` dans un navigateur : aucun serveur n'est nécessaire.
 - **Ajouter une séquence** : copier `_modele.html` sous `<id>.html`, mettre `data-seq="<id>"` sur `<body>`,
   puis ajouter l'entrée correspondante (même `id`) dans `sequences` de `data.js`.
 - **Indicateur « En cours »** : `evenement.date` (`"2026-12-15"`) dans `data.js`, au format AAAA-MM-JJ.
+- **Vue claire / vue sombre** : bouton soleil/lune dans l’en-tête (`assets/js/theme.js`, à charger dans le `<head>` de toute nouvelle page). Par défaut, le site suit le réglage de l’ordinateur ; le choix du visiteur est mémorisé dans son navigateur.
 - **Couleurs** : A rouge clair, B jaune, C vert, commun bleu → variables `--pA`, `--pB`, `--pC`, `--pX` de `assets/css/style.css`.
 
 ## Pages qui lisent aussi `data.js`
