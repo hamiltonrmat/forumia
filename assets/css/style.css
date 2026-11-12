@@ -11,12 +11,14 @@
   --line-strong: #cfc8b9;
   --accent: #9b2335;          /* rouge Alsace, adouci */
   --accent-soft: #f3e3e3;
-  --pA: #4f7a63;              /* Je découvre */
-  --pB: #a8711f;              /* J'explore */
-  --pC: #3f4f8f;              /* Je m'inspire */
-  --pA-soft: #e4ede6;
-  --pB-soft: #f3e9d8;
-  --pC-soft: #e3e6f2;
+  --pA: #c4475b;              /* A · Je découvre : rouge clair */
+  --pB: #9a7300;              /* B · Je m'inspire : jaune */
+  --pC: #2f8a57;              /* C · Je me projette : vert */
+  --pX: #3a72c2;              /* Commun à tous : bleu */
+  --pA-soft: #fbe3e6;
+  --pB-soft: #fbf1cc;
+  --pC-soft: #ddf1e4;
+  --pX-soft: #e1ebf8;
   --todo: #fff5d6;
   --todo-line: #e6c86e;
 
@@ -40,12 +42,14 @@
     --line-strong: #45423b;
     --accent: #e0697a;
     --accent-soft: #3a2125;
-    --pA: #86b89a;
-    --pB: #d9a650;
-    --pC: #8fa0e0;
-    --pA-soft: #1f2c24;
-    --pB-soft: #31281a;
-    --pC-soft: #20243a;
+    --pA: #f08a98;
+    --pB: #e6c14f;
+    --pC: #6fca94;
+    --pX: #82aeea;
+    --pA-soft: #3a2126;
+    --pB-soft: #332d14;
+    --pC-soft: #1a2e22;
+    --pX-soft: #1c2638;
     --todo: #33301f;
     --todo-line: #7d6a2c;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .6);
@@ -232,7 +236,9 @@ a:hover .arrow, button:hover .arrow { transform: translateX(3px); }
 }
 
 /* ---------- Programme ---------- */
-.page-head { padding: clamp(3rem, 8vw, 5.5rem) 0 2rem; }
+.page-head { padding-top: clamp(3rem, 8vw, 5.5rem); padding-bottom: 2rem; }
+.page-actions { margin: 1.75rem 0 0; }
+.page-actions .muted { font-weight: 400; }
 .page-head h1 { font-size: clamp(2.8rem, 8vw, 5.5rem); font-weight: 300; letter-spacing: -.04em; margin: 1rem 0 1.25rem; }
 
 .toolbar {
@@ -528,6 +534,7 @@ p.todo, li.todo, div.todo { display: block; padding: .75rem 1rem; }
 [data-p="A"], [data-parcours="A"] { --c: var(--pA); --c-soft: var(--pA-soft); }
 [data-p="B"], [data-parcours="B"] { --c: var(--pB); --c-soft: var(--pB-soft); }
 [data-p="C"], [data-parcours="C"] { --c: var(--pC); --c-soft: var(--pC-soft); }
+[data-parcours="commun"] { --c: var(--pX); --c-soft: var(--pX-soft); }
 
 /* ---------- Aperçu des stands (page d'accueil) ---------- */
 .stands-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }

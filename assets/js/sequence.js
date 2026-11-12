@@ -72,14 +72,14 @@
     function render(idx) {
       courant = (idx + list.length) % list.length;
       var st = list[courant], p = D.parcours[st.niveau];
-      dlg.setAttribute("data-parcours", st.niveau);
+      dlg.setAttribute("data-parcours", F.standCouleur(st));
       dlg.innerHTML =
         '<div class="sd-top">' +
-          '<span class="stand-num">' + (st.numero < 10 ? "0" : "") + st.numero + "</span>" +
+          '<span class="stand-num">' + F.standNum(st) + "</span>" +
           (p ? '<span class="stand-level"><span class="dot" aria-hidden="true"></span>' + esc(p.nom) + " · " + esc(p.niveau) + "</span>" : "") +
           '<button class="sd-close" type="button" aria-label="Fermer">×</button>' +
         "</div>" +
-        '<p class="stand-label">Stand ' + st.numero + "</p>" +
+        '<p class="stand-label">' + F.standNom(st) + "</p>" +
         '<h2 id="stand-dialog-title" class="sd-title">' + esc(st.titre) + "</h2>" +
         (st.animateur ? '<p class="sd-who">Animé par ' + esc(st.animateur) + "</p>" : "") +
         (st.description
@@ -126,8 +126,13 @@
   }
 
   // Précédent / suivant dans l'ordre du programme
-  var list = D.sequences, i = list.indexOf(s);
-  var prev = list[i - 1], next = list[i + 1];
+  // (les parcours A, B, C étant simultanés, on saute les autres parcours du même créneau)
+  var list = D.sequences, i = list.indexOf(s), j = i;
+  if (s.parcours) {
+    while (i > 0 && list[i - 1].creneau === s.creneau) i--;
+    while (j < list.length - 1 && list[j + 1].creneau === s.creneau) j++;
+  }
+  var prev = list[i - 1], next = list[j + 1];
   var nav = document.getElementById("seq-nav");
   if (nav) {
     nav.innerHTML =

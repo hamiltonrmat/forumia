@@ -1,0 +1,12 @@
+{
+  "name": "forumia-export-pdf",
+  "private": true,
+  "type": "module",
+  "description": "Export Markdown → PDF élégant pour le Forum IA (via Chrome/Edge headless)",
+  "scripts": {
+    "programme": "node export.mjs ../programme-forum-ia-2026.md ../../assets/pdf/programme-forum-ia-2026.pdf"
+  },
+  "dependencies": {
+    "marked": "15.0.12"
+  }
+}

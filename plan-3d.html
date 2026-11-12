@@ -31,7 +31,7 @@
   --map-path:#131A23;
   --map-path-gap:#FFFFFF;
   --z-commun:#3A72C2;
-  --z-a:#D6457A;
+  --z-a:#D9485F;
   --z-b:#D9A514;
   --z-c:#2D925E;
   --z-x:#8C97A6;
@@ -44,7 +44,7 @@
     --map-bg:#10161C; --map-ground:#141B22; --map-grid:#1F2831; --map-slab:#212B36; --map-wall:#3F4C5C; --map-block:#2F3A47;
     --map-pillar:#516070; --map-edge:#6F7F91; --map-glass:#3D6D96; --map-screen:#0A0E13; --map-counter:#3B4756;
     --map-path:#F4F7FA; --map-path-gap:#212B36;
-    --z-commun:#699CE9; --z-a:#EC6E9B; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
+    --z-commun:#699CE9; --z-a:#F08A98; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
     color-scheme:dark;
   }
 }
@@ -53,11 +53,14 @@
   --map-bg:#10161C; --map-ground:#141B22; --map-grid:#1F2831; --map-slab:#212B36; --map-wall:#3F4C5C; --map-block:#2F3A47;
   --map-pillar:#516070; --map-edge:#6F7F91; --map-glass:#3D6D96; --map-screen:#0A0E13; --map-counter:#3B4756;
   --map-path:#F4F7FA; --map-path-gap:#212B36;
-  --z-commun:#699CE9; --z-a:#EC6E9B; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
+  --z-commun:#699CE9; --z-a:#F08A98; --z-b:#F0C445; --z-c:#50C087; --z-x:#7E8B9C;
   color-scheme:dark;
 }
 
 html,body{height:100%}
+.back-link{display:inline-block;margin-bottom:.6rem;font-size:.85rem;color:var(--muted);text-decoration:none}
+.back-link:hover{color:var(--ink);text-decoration:underline}
+.back-link[hidden]{display:none}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -251,6 +254,7 @@ button{font:inherit;color:inherit}
 <div class="app">
   <aside class="panel" aria-label="Espaces et programme du forum">
     <header class="panel-head">
+      <a class="back-link" id="back-link" href="index.html" hidden>← Retour au site du forum</a>
       <span class="eyebrow">Plan interactif</span>
       <h1 id="ev-name">Forum IA</h1>
       <p class="event-meta" id="ev-meta"></p>
@@ -288,86 +292,119 @@ button{font:inherit;color:inherit}
   </main>
 </div>
 
+<script src="assets/js/data.js"></script>
 <script>
 document.documentElement.lang = 'fr';
 (function () {
 'use strict';
 
 /* =====================================================================
-   1. CONTENU DU FORUM — programme transmis ; les crochets restent à compléter
+   1. CONTENU DU FORUM — lu dans assets/js/data.js (source unique du site)
+      Seul ce qui est propre à la maquette reste ici : les espaces cliquables,
+      leur emplacement et le nombre d'emplacements de stands.
    ===================================================================== */
-const EVENEMENT = { nom: 'ForumIA CeA 2026', date: 'Mardi 15 décembre 2026', lieu: 'Hôtel d’Alsace, Strasbourg' };
+const FORUM = window.FORUM;
+const ev = FORUM.evenement;
+const hm = (t) => { const [h, m] = t.split(':'); return parseInt(h, 10) + 'h' + (m === '00' ? '' : m); };
+const plage = (a, b) => hm(a) + '–' + hm(b);
+const minutes = (a, b) => { const x = (t) => +t.split(':')[0] * 60 + +t.split(':')[1]; return x(b) - x(a); };
+const nomLieu = (id) => (FORUM.lieux[id] || { nom: id }).nom;
+const creneau = (id) => FORUM.creneaux.find((c) => c.id === id) || { debut: '', fin: '' };
+
+// Date longue (« Mardi 15 décembre 2026 ») calculée depuis evenement.date
+let dateLongue = ev.dateLabel;
+if (ev.date) {
+  const d = new Date(ev.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  dateLongue = d.charAt(0).toUpperCase() + d.slice(1);
+}
+const EVENEMENT = { nom: ev.titre + ' ' + ev.edition, date: dateLongue, lieu: ev.lieu };
 
 // Les trois niveaux du forum (code couleur du programme)
-const NIVEAUX = {
-  commun: { nom: 'Commun à tous', couleur: '--z-commun' },
-  a: { nom: 'Je découvre', parcours: 'Parcours A', si: 'Pas d’IA', couleur: '--z-a', zone: 'parcours-a' },
-  b: { nom: 'Je m’inspire', parcours: 'Parcours B', si: 'Le présent : on le fait déjà', couleur: '--z-b', zone: 'parcours-b' },
-  c: { nom: 'Je me projette', parcours: 'Parcours C', si: 'Le futur : vers où aller', couleur: '--z-c', zone: 'parcours-c' },
-  x: { nom: 'Niveau à préciser', couleur: '--z-x' }
-};
+const NIVEAUX = { commun: { nom: 'Commun à tous', couleur: '--z-commun' }, x: { nom: 'Niveau à préciser', couleur: '--z-x' } };
+for (const k of Object.keys(FORUM.parcours)) {
+  const p = FORUM.parcours[k], c = k.toLowerCase();
+  NIVEAUX[c] = { nom: p.nom, parcours: 'Parcours ' + k, si: p.niveau, couleur: '--z-' + c, zone: 'parcours-' + c, lieu: p.lieu };
+}
+
+// Stands de l'Agora : répartis dans l'ordre de data.js sur les emplacements de la maquette
+const agora = FORUM.sequences.find((s) => s.id === 'agora') || { stands: [] };
+const standsData = (agora.stands || []).filter((s) => !s.cafe);
+const cafeData = (agora.stands || []).find((s) => s.cafe);
+const EMPLACEMENTS = { 'agora-piliers': 6, 'agora-ecran': 4 };   // nombre de stands dessinés sur la maquette
+let rang = 0;
+const standsPour = (zone) => Array.from({ length: EMPLACEMENTS[zone] }, () => {
+  const s = standsData[rang++];
+  return s ? { n: String(s.numero), niveau: FORUM.parcours[s.niveau] ? s.niveau.toLowerCase() : 'x', theme: s.titre + (s.animateur && s.animateur !== 'À confirmer' ? ' · ' + s.animateur : '') }
+           : { n: '', niveau: 'x', theme: 'Emplacement libre' };
+});
+const standsPiliers = standsPour('agora-piliers'), standsEcran = standsPour('agora-ecran');
+const numeros = (l) => l.filter((s) => s.n).map((s) => s.n);
+const libelleStands = (l) => { const n = numeros(l); return n.length ? 'Stands ' + n[0] + ' à ' + n[n.length - 1] : 'Stands'; };
+if (standsData.length > rang) console.warn('Plan 3D : ' + (standsData.length - rang) + ' stand(s) de data.js sans emplacement sur la maquette.');
+
+// Clôture : affichée sur l'espace où elle a lieu (data.js)
+const seqCloture = FORUM.sequences.filter((s) => s.creneau === 'cloture');
+const lieuCloture = seqCloture.length ? seqCloture[0].lieu : 'pleniere';
+const cParcours = creneau('parcours'), cAgora = creneau('agora');
+const groupeParcours = 'Parcours au choix · ' + plage(cParcours.debut, cParcours.fin);
+const groupeAgora = 'Agora de l’IA · ' + plage(cAgora.debut, cAgora.fin);
 
 // Espaces cliquables sur la maquette
 const ZONES = [
-  { id: 'pleniere', nom: 'Salle plénière', sous: 'Ouverture et clôture', groupe: 'Commun à tous', niveau: 'commun' },
+  { id: 'pleniere', nom: 'Salle plénière', sous: lieuCloture === 'pleniere' ? 'Ouverture et clôture' : 'Plénière d’ouverture', groupe: 'Commun à tous', niveau: 'commun' },
   { id: 'accueil', nom: 'Accueil', sous: 'Enregistrement', groupe: 'Commun à tous', niveau: 'commun' },
-  { id: 'cafe', nom: 'Espace café', sous: 'Entre le parcours A et la plénière', pin: 'Espace café', groupe: 'Commun à tous', niveau: 'commun' },
-  { id: 'robot', nom: 'Robot d’accueil', sous: 'Près de l’entrée', groupe: 'Commun à tous', niveau: 'commun', minor: true,
-    description: '[Présentation du robot d’accueil à compléter]' },
-  { id: 'parcours-a', nom: 'Parcours A', sous: 'Salle 1006/1007', groupe: 'Parcours au choix · 10h10–11h', niveau: 'a', pinSous: true },
-  { id: 'parcours-b', nom: 'Parcours B', sous: 'Salle 1005', groupe: 'Parcours au choix · 10h10–11h', niveau: 'b', pinSous: true },
-  { id: 'parcours-c', nom: 'Parcours C', sous: 'Espace écran du hall', groupe: 'Parcours au choix · 10h10–11h', niveau: 'c', pinSous: true },
-  { id: 'agora-piliers', nom: 'Agora de l’IA', sous: 'Stands 1 à 6, le long des piliers', pin: 'Stands 1 à 6', pinSub: 'Agora de l’IA',
-    groupe: 'Agora de l’IA · 11h–12h', niveau: 'commun', pinSous: true,
-    stands: [
-      { n: '1', niveau: 'a', theme: '[Thème à préciser]' }, { n: '2', niveau: 'a', theme: '[Thème à préciser]' },
-      { n: '3', niveau: 'b', theme: '[Thème à préciser]' }, { n: '4', niveau: 'b', theme: '[Thème à préciser]' },
-      { n: '5', niveau: 'b', theme: '[Thème à préciser]' }, { n: '6', niveau: 'c', theme: '[Thème à préciser]' }
-    ] },
-  { id: 'agora-ecran', nom: 'Agora de l’IA', sous: 'Stands 7 à 10, près de l’espace écran', pin: 'Stands 7 à 10', pinSub: 'Agora de l’IA',
-    groupe: 'Agora de l’IA · 11h–12h', niveau: 'commun', pinSous: true,
-    stands: [
-      { n: '7', niveau: 'c', theme: '[Thème à préciser]' }, { n: '8', niveau: 'x', theme: '[Thème à préciser]' },
-      { n: '9', niveau: 'x', theme: '[Thème à préciser]' }, { n: '10', niveau: 'x', theme: '[Thème à préciser]' }
-    ] }
+  { id: 'cafe', nom: cafeData ? cafeData.titre : 'Espace café', sous: 'Entre le parcours A et la plénière', pin: 'Espace café', groupe: 'Commun à tous', niveau: 'commun',
+    description: cafeData ? cafeData.description : '' },
+  { id: 'robot', nom: 'Le Mannele', sous: 'Agent d’accueil IA, près de l’entrée', groupe: 'Commun à tous', niveau: 'commun', minor: true,
+    description: 'Le Mannele accueille les participants à l’entrée et répond à leurs questions sur le programme : horaires, salles, parcours et stands.' },
+  ...['a', 'b', 'c'].filter((c) => NIVEAUX[c]).map((c) => ({
+    id: 'parcours-' + c, nom: NIVEAUX[c].parcours,
+    sous: nomLieu(NIVEAUX[c].lieu) + (lieuCloture === NIVEAUX[c].lieu ? ' · clôture' : ''),
+    groupe: groupeParcours, niveau: c, pinSous: true
+  })),
+  { id: 'agora-piliers', nom: 'Agora de l’IA', sous: libelleStands(standsPiliers) + ', le long des piliers', pin: libelleStands(standsPiliers), pinSub: 'Agora de l’IA',
+    groupe: groupeAgora, niveau: 'commun', pinSous: true, stands: standsPiliers },
+  { id: 'agora-ecran', nom: 'Agora de l’IA', sous: libelleStands(standsEcran) + ', près de l’espace écran', pin: libelleStands(standsEcran), pinSub: 'Agora de l’IA',
+    groupe: groupeAgora, niveau: 'commun', pinSous: true, stands: standsEcran }
 ];
 
-// Déroulé de la journée (programme du forum)
-const PROGRAMME = [
-  { debut: '08:30', fin: '09:00', niveau: 'commun', titre: 'Accueil café et enregistrement', lieu: 'Hall d’entrée', zones: ['accueil', 'cafe'] },
-  { debut: '09:00', fin: '10:00', niveau: 'commun', titre: 'Ouverture', lieu: 'Salle plénière', zones: ['pleniere'],
-    items: [
-      { duree: '5 min', titre: 'Mot de bienvenue', texte: 'L’ambition de la CeA en termes d’IA : proximité, efficacité et simplicité.', qui: 'Gabriel GALLAND et un élu' },
-      { duree: '50 min', titre: 'IA : de quoi parle-t-on ?', texte: 'Le délégué à l’IA de la CeA interroge un expert reconnu du sujet.', qui: 'Hamilton DE ARAUJO et Germain FORESTIER (UHA)' },
-      { duree: '5 min', titre: 'Déroulé de la journée', qui: 'Hamilton DE ARAUJO' }
-    ] },
-  { debut: '10:00', fin: '10:10', pause: true, titre: 'Changement de salle' },
-  { debut: '10:10', fin: '11:00', niveau: 'a', titre: 'Le SAV de l’IA', lieu: 'Salle 1006/1007', zones: ['parcours-a'],
-    texte: 'Découvrir et comprendre les principaux sujets liés à l’utilisation de l’IA générative.',
-    format: 'Trois situations au format scène, débrief et apport théorique, suivies d’une conclusion participative avec le public.',
-    public: 'Je suis débutant en IA et j’ai envie de l’explorer davantage.',
-    equipe: ['Animation : Pierre GRAEF', 'IA : Emilie D.', 'SAV : Benoit F.'], cr: true },
-  { debut: '10:10', fin: '11:00', niveau: 'b', titre: 'Table ronde : l’IA dans la CeA', lieu: 'Salle 1005', zones: ['parcours-b'],
-    points: [
-      'Un agent à l’aise avec l’IA générative pour ses tâches quotidiennes (licences Copilot)',
-      'Le projet OCR Solidarités',
-      'Une IA a produit presque seule une de nos applications (DSIN)'
-    ],
-    public: 'Je connais l’IA, j’ai envie de l’intégrer dans mon métier, mais j’ai besoin de voir des cas pratiques et des témoignages concrets existant dans la Collectivité.',
-    equipe: ['Médiation : Hamilton DE ARAUJO', 'Intervenants : [Intervenant 1], Lucas DELAGREE, [Intervenant 3]'], cr: true },
-  { debut: '10:10', fin: '11:00', niveau: 'c', titre: 'L’émission du futur', lieu: 'Espace écran, dans le hall', zones: ['parcours-c'],
-    texte: 'Trois visions du service public alsacien de 2030.',
-    points: ['Simuler : voir avant d’agir', 'Anticiper : agir avant que le problème n’arrive', 'Augmenter : des agents dotés de nouvelles capacités'],
-    public: 'J’ai confiance dans l’IA, je veux me projeter et exploiter de nouvelles possibilités.',
-    equipe: ['Médiation : Gabriel GALLAND ou Stéphanie MENIGOZ'] },
-  { debut: '11:00', fin: '12:00', niveau: 'commun', titre: 'L’Agora de l’IA', lieu: 'Hall d’entrée', zones: ['agora-piliers', 'agora-ecran', 'cafe'],
-    texte: 'Séquence libre dans le hall, indépendante du parcours suivi auparavant : ateliers, démonstrations et échanges autour d’un café.' },
-  { debut: '12:00', fin: '12:30', niveau: 'commun', titre: 'Clôture', lieu: 'Salle plénière ou hall (à confirmer)', zones: ['pleniere'],
-    items: [
-      { titre: 'Adoptez l’IA dans votre quotidien', qui: 'Hamilton DE ARAUJO' },
-      { titre: 'Mot de fin : ambition et prochaines actions en termes d’IA', qui: 'Gabriel GALLAND' }
-    ] }
-];
+// Espaces à mettre en évidence pour chaque lieu de data.js (le hall dépend de la séquence)
+const ZONES_LIEU = { pleniere: ['pleniere'], salleA: ['parcours-a'], salleB: ['parcours-b'], espaceHall: ['parcours-c'], hall: ['accueil', 'cafe'] };
+const ZONES_SEQUENCE = { accueil: ['accueil', 'cafe'], agora: ['agora-piliers', 'agora-ecran', 'cafe'] };
+const zonesDe = (s) => ZONES_SEQUENCE[s.id] || ZONES_LIEU[s.lieu] || [];
+const qui = (s) => s.intervenants.map((i, n) => n ? i.nom.replace(/^Un·e /, 'un·e ') : i.nom).join(' et ');
+const equipe = (s) => {
+  const avecRole = s.intervenants.filter((i) => i.role).map((i) => i.role + ' : ' + i.nom);
+  const sansRole = s.intervenants.filter((i) => !i.role).map((i) => i.nom);
+  return avecRole.concat(sansRole.length ? ['Intervenants : ' + sansRole.join(', ')] : []);
+};
+
+// Déroulé de la journée, créneau par créneau
+const PROGRAMME = [];
+for (const c of FORUM.creneaux) {
+  const seqs = FORUM.sequences.filter((s) => s.creneau === c.id);
+  if (c.pause) { PROGRAMME.push({ debut: c.debut, fin: c.fin, pause: true, titre: c.titre }); continue; }
+  if (seqs.some((s) => s.parcours)) {
+    for (const s of seqs) {
+      const p = FORUM.parcours[s.parcours];
+      PROGRAMME.push({
+        debut: s.debut, fin: s.fin, niveau: s.parcours.toLowerCase(), titre: s.titre, lieu: nomLieu(s.lieu), zones: zonesDe(s),
+        texte: s.sousTitre, points: s.points, format: s.points ? undefined : p.format,
+        public: p.profil, equipe: s.intervenants.length ? equipe(s) : undefined, cr: s.livrable
+      });
+    }
+    continue;
+  }
+  const lieux = [...new Set(seqs.map((s) => s.lieu))];
+  const entree = { debut: c.debut, fin: c.fin, niveau: 'commun', titre: c.titre, lieu: lieux.map(nomLieu).join(', '),
+    zones: [...new Set(seqs.flatMap(zonesDe))] };
+  if (seqs.length > 1) {
+    entree.items = seqs.map((s) => ({ duree: minutes(s.debut, s.fin) + ' min', titre: s.titre, texte: s.sousTitre, qui: qui(s) }));
+  } else if (seqs.length === 1) {
+    entree.texte = seqs[0].resume;
+  }
+  PROGRAMME.push(entree);
+}
 for (const z of ZONES) z.couleur = NIVEAUX[z.niveau].couleur;
 
 /* =====================================================================
@@ -1406,7 +1443,7 @@ function renderDetail(z) {
       blk.appendChild(q);
     }
     if (p.equipe) { const ul = el('ul', 'team'); for (const t of p.equipe) ul.appendChild(el('li', null, t)); blk.appendChild(ul); }
-    if (p.cr) { const c = el('p', 'cr'); c.innerHTML = ICON_DOC; c.appendChild(document.createTextNode('Compte rendu au format PPT généré par IA')); blk.appendChild(c); }
+    if (p.cr) { const c = el('p', 'cr'); c.innerHTML = ICON_DOC; c.appendChild(document.createTextNode(typeof p.cr === 'string' ? p.cr : 'Compte rendu au format PPT généré par IA')); blk.appendChild(c); }
     d.appendChild(blk);
   }
 
@@ -1461,6 +1498,8 @@ window.addEventListener('hashchange', () => { const id = location.hash.slice(1);
    9. DÉMARRAGE
    ===================================================================== */
 $('#ev-name').textContent = EVENEMENT.nom;
+// Lien de retour seulement quand le plan est ouvert seul (pas dans l'iframe de la page d'accueil)
+try { if (window.self === window.top) $('#back-link').hidden = false; } catch (e) { /* iframe d'une autre origine */ }
 $('#ev-meta').textContent = EVENEMENT.date + ' · ' + EVENEMENT.lieu;
 renderZoneList(); renderProgramme();
 

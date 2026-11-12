@@ -21,12 +21,14 @@
   --line-strong: #cfc8b9;
   --accent: #9b2335;          /* rouge Alsace, adouci */
   --accent-soft: #f3e3e3;
-  --pA: #4f7a63;              /* Je découvre */
-  --pB: #a8711f;              /* J'explore */
-  --pC: #3f4f8f;              /* Je m'inspire */
-  --pA-soft: #e4ede6;
-  --pB-soft: #f3e9d8;
-  --pC-soft: #e3e6f2;
+  --pA: #c4475b;              /* A · Je découvre : rouge clair */
+  --pB: #9a7300;              /* B · Je m'inspire : jaune */
+  --pC: #2f8a57;              /* C · Je me projette : vert */
+  --pX: #3a72c2;              /* Commun à tous : bleu */
+  --pA-soft: #fbe3e6;
+  --pB-soft: #fbf1cc;
+  --pC-soft: #ddf1e4;
+  --pX-soft: #e1ebf8;
   --todo: #fff5d6;
   --todo-line: #e6c86e;
 
@@ -50,12 +52,14 @@
     --line-strong: #45423b;
     --accent: #e0697a;
     --accent-soft: #3a2125;
-    --pA: #86b89a;
-    --pB: #d9a650;
-    --pC: #8fa0e0;
-    --pA-soft: #1f2c24;
-    --pB-soft: #31281a;
-    --pC-soft: #20243a;
+    --pA: #f08a98;
+    --pB: #e6c14f;
+    --pC: #6fca94;
+    --pX: #82aeea;
+    --pA-soft: #3a2126;
+    --pB-soft: #332d14;
+    --pC-soft: #1a2e22;
+    --pX-soft: #1c2638;
     --todo: #33301f;
     --todo-line: #7d6a2c;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .6);
@@ -538,6 +542,7 @@ p.todo, li.todo, div.todo { display: block; padding: .75rem 1rem; }
 [data-p="A"], [data-parcours="A"] { --c: var(--pA); --c-soft: var(--pA-soft); }
 [data-p="B"], [data-parcours="B"] { --c: var(--pB); --c-soft: var(--pB-soft); }
 [data-p="C"], [data-parcours="C"] { --c: var(--pC); --c-soft: var(--pC-soft); }
+[data-parcours="commun"] { --c: var(--pX); --c-soft: var(--pX-soft); }
 
 /* ---------- Aperçu des stands (page d'accueil) ---------- */
 .stands-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
@@ -595,7 +600,8 @@ p.todo, li.todo, div.todo { display: block; padding: .75rem 1rem; }
 }
 
 /* ---------- Page dédiée ---------- */
-.mn-entete .header-inner { justify-content: flex-start; }
+.mn-entete .header-inner { justify-content: space-between; }
+.mn-retour { padding: .5rem 1rem; font-size: .88rem; }
 .mn-entete .brand { padding: .4rem 0; }
 #studio { scroll-margin-top: 64px; }
 .page-head h1 em { font-style: italic; color: var(--accent); }
@@ -713,12 +719,14 @@ p.todo, li.todo, div.todo { display: block; padding: .75rem 1rem; }
     --line-strong: #45423b;
     --accent: #e0697a;
     --accent-soft: #3a2125;
-    --pA: #86b89a;
-    --pB: #d9a650;
-    --pC: #8fa0e0;
-    --pA-soft: #1f2c24;
-    --pB-soft: #31281a;
-    --pC-soft: #20243a;
+    --pA: #f08a98;
+    --pB: #e6c14f;
+    --pC: #6fca94;
+    --pX: #82aeea;
+    --pA-soft: #3a2126;
+    --pB-soft: #332d14;
+    --pC-soft: #1a2e22;
+    --pX-soft: #1c2638;
     --todo: #33301f;
     --todo-line: #7d6a2c;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .6);
@@ -740,6 +748,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <a class="brand" href="index.html" aria-label="Forum IA 2026, retour à l’accueil">
         <span class="brand-mark"></span><span class="brand-name">Forum IA</span><span class="brand-ed">2026</span>
       </a>
+      <a class="btn btn-ghost mn-retour" href="index.html"><span class="arrow" aria-hidden="true">←</span> Retour à l’accueil</a>
     </div>
   </header>
 
@@ -1098,19 +1107,51 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   global.Mannele = { monter };
 })(window);
 </script>
-<script>/* Page « Le Mannele » : conversation préenregistrée et démonstration des gestes. */
+<script src="assets/js/data.js"></script>
+<script>/* Page « Le Mannele » : conversation préenregistrée et démonstration des gestes.
+   Les réponses sont construites à partir de assets/js/data.js (horaires, salles, stands). */
 (function () {
   "use strict";
   const racine = document.body.dataset.root ?? "";
+  const D = window.FORUM;
+
+  // Heures à l’oral : "10:10" → "10 h 10", "12:00" → "midi"
+  const heureParlee = (t) => {
+    const [h, m] = t.split(":");
+    if (t === "12:00") return "midi";
+    return parseInt(h, 10) + " h" + (m === "00" ? "" : " " + m);
+  };
+  // Lieu avec sa préposition : "en salle 1005", "en salles 1006 et 1007", "à l’espace écran…", "dans le hall…"
+  const ou = (id) => {
+    const nom = (D.lieux[id] || { nom: id }).nom;
+    const double = /^Salle (\d+)\s*\/\s*(\d+)$/.exec(nom);
+    if (double) return "en salles " + double[1] + " et " + double[2];
+    if (/^Salle /.test(nom)) return "en " + nom.charAt(0).toLowerCase() + nom.slice(1);
+    if (/^Hall/.test(nom)) return "dans le " + nom.charAt(0).toLowerCase() + nom.slice(1);
+    return "à l’" + nom.charAt(0).toLowerCase() + nom.slice(1);
+  };
+  const creneau = (id) => D.creneaux.find((c) => c.id === id);
+  const guillemets = (t) => "« " + t + " »";
+  const liste = (l) => l.length > 1 ? l.slice(0, -1).join(", ") + ", et " + l[l.length - 1] : l.join("");
+
+  const cParcours = creneau("parcours"), cAgora = creneau("agora");
+  const parcours = Object.keys(D.parcours).map((k) => guillemets(D.parcours[k].nom) + " " + (k === Object.keys(D.parcours)[0] ? "est " : "") + ou(D.parcours[k].lieu));
+  const agora = D.sequences.find((s) => s.id === "agora") || { stands: [] };
+  const nbStands = (agora.stands || []).filter((s) => !s.cafe).length;
+  const cafe = (agora.stands || []).some((s) => s.cafe);
+  const cloture = D.sequences.find((s) => s.creneau === "cloture");
+
   const ECHANGES = [
-    { q: "À quelle heure commencent les parcours\u202f?",
-      r: "Les parcours initiaux ont lieu de 10 h 20 à 11 h. «\u00a0Je découvre\u00a0» est en salles 1006 et 1007, «\u00a0J’explore\u00a0» en salle 1005, et «\u00a0Je m’inspire\u00a0» à l’espace écran.",
+    { q: "À quelle heure commencent les parcours ?",
+      r: "Les parcours initiaux ont lieu de " + heureParlee(cParcours.debut) + " à " + heureParlee(cParcours.fin) + ". " + liste(parcours) + ".",
       geste: "montre-d" },
-    { q: "C’est quoi, l’Agora de l’IA\u202f?",
-      r: "De 11 h à midi, vous circulez librement entre 8 stands de démonstration et d’ateliers, quel que soit votre parcours. C’est le moment idéal pour échanger\u202f!",
+    { q: "C’est quoi, l’Agora de l’IA ?",
+      r: "De " + heureParlee(cAgora.debut) + " à " + heureParlee(cAgora.fin) + ", vous circulez librement entre " + nbStands + " stands de démonstration et d’ateliers" +
+         (cafe ? ", plus le Stand Café" : "") + ", quel que soit votre parcours. C’est le moment idéal pour échanger !",
       geste: "saut" },
     { q: "Je ne sais pas quel parcours choisir…",
-      r: "Pas de panique\u202f! Votre parcours ne fixe que votre salle de 10 h 20 à 11 h. Ensuite, tout le monde se retrouve à l’Agora, puis pour la clôture.",
+      r: "Pas de panique ! Votre parcours ne fixe que votre salle de " + heureParlee(cParcours.debut) + " à " + heureParlee(cParcours.fin) +
+         ". Ensuite, tout le monde se retrouve à l’Agora, puis pour la clôture" + (cloture ? " " + ou(cloture.lieu) : "") + ".",
       geste: "coucou" },
   ];
   const ACCUEIL = "Bonjour\u202f! Je suis le Mannele, et je vous accueillerai à l’entrée du forum. Choisissez une question ci-dessous, je vous réponds.";

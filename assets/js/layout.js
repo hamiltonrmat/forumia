@@ -35,19 +35,24 @@
     } catch (e) { return null; }
   }
 
+  // Stands : numéro affiché ("01"…, "☕" pour le Stand Café), libellé et code couleur (A, B, C ou commun)
+  function standNum(st) { return st.cafe ? "☕" : (st.numero < 10 ? "0" : "") + st.numero; }
+  function standNom(st) { return st.cafe ? "Commun à tous" : "Stand " + st.numero; }
+  function standCouleur(st) { return st.cafe ? "commun" : (D.parcours[st.niveau] ? st.niveau : ""); }
+
   // Carte de stand : lien (programme) ou bouton ouvrant la fenêtre de détail (page Agora)
   function standCard(st, href, idx) {
     var p = D.parcours[st.niveau];
-    var num = (st.numero < 10 ? "0" : "") + st.numero;
+    var coul = standCouleur(st);
     var open = href
       ? '<a class="stand" href="' + href + '"'
       // pas d'id="stand-N" : le #stand-N de l'URL ferait défiler la page à l'ouverture de la fenêtre
       : '<button type="button" class="stand" data-stand="' + idx + '" aria-haspopup="dialog"';
-    return open + (p ? ' data-parcours="' + st.niveau + '"' : "") + ">" +
-      '<span class="stand-top"><span class="stand-num">' + num + "</span>" +
+    return open + (coul ? ' data-parcours="' + coul + '"' : "") + ">" +
+      '<span class="stand-top"><span class="stand-num" aria-hidden="' + (st.cafe ? "true" : "false") + '">' + standNum(st) + "</span>" +
         (p ? '<span class="stand-level"><span class="dot" aria-hidden="true"></span>' + esc(p.nom) + "</span>" : "") +
       "</span>" +
-      '<span class="stand-label">Stand ' + st.numero + "</span>" +
+      '<span class="stand-label">' + standNom(st) + "</span>" +
       '<span class="stand-title">' + esc(st.titre) + "</span>" +
       (st.animateur ? '<span class="stand-who">' + esc(st.animateur) + "</span>" : "") +
       (href ? "" : '<span class="stand-open">Voir le détail <span class="arrow" aria-hidden="true">→</span></span>') +
@@ -57,7 +62,8 @@
   window.F = {
     esc: esc, heure: heure, minutes: minutes, duree: duree, lieu: lieu,
     seqUrl: seqUrl, seq: seq, root: root, estAujourdhui: estAujourdhui,
-    maintenant: maintenant, store: store, standCard: standCard
+    maintenant: maintenant, store: store, standCard: standCard,
+    standNum: standNum, standNom: standNom, standCouleur: standCouleur
   };
 
   var ev = D.evenement;

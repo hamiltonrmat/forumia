@@ -10,19 +10,19 @@ window.FORUM = {
     edition: "2026",
     organisateur: "Collectivité européenne d’Alsace",
     accroche: "Comprendre, explorer, s’inspirer : une matinée pour faire entrer l’intelligence artificielle dans nos métiers.",
-    date: null,               // format "2026-12-03" : active l’indicateur « en cours » le jour J
+    date: "2026-12-15",       // format AAAA-MM-JJ : active l’indicateur « en cours » le jour J
     dateLabel: "15 décembre 2026",
     horaires: "8h30 – 12h30",
-    lieu: "Hôtel d'Alsace, Strasbourg",
+    lieu: "Hôtel d’Alsace, Strasbourg",
     contact: "Direction de la transformation, data & IA"
   },
 
   lieux: {
-    hall:       { nom: "Hall d’entrée",  role: "Accueil, café, stands, Agora de l'IA" },
-    pleniere:   { nom: "Salle plénière", role: "Ouverture et clôture" },
+    hall:       { nom: "Hall d’entrée",  role: "Accueil, café, stands de l’Agora de l’IA" },
+    pleniere:   { nom: "Salle plénière", role: "Plénière d’ouverture" },
     salleA:     { nom: "Salle 1006/1007", role: "Parcours A : Je découvre" },
     salleB:     { nom: "Salle 1005",      role: "Parcours B : Je m’inspire" },
-    espaceHall: { nom: "Espace écran dans le hall", role: "Parcours C : Je me projette" }
+    espaceHall: { nom: "Espace écran dans le hall", role: "Parcours C : Je me projette, puis plénière de clôture" }
   },
 
   parcours: {
@@ -30,14 +30,14 @@ window.FORUM = {
       nom: "Je découvre",
       niveau: "Pas d’IA",
       profil: "Je suis débutant en IA et j’ai envie de l’explorer davantage.",
-      format: "3 situations : Scène → Débat → Apport théorique + conclusion participative",
+      format: "3 mini-scènes du SAV de l’IA, chacune en Scène → Débrief → Apport théorique, puis conclusion participative",
       lieu: "salleA",
       page: "parcours-a"
     },
     B: {
       nom: "Je m’inspire",
       niveau: "Le présent : on le fait déjà",
-      profil: "Je connais l’IA, j’ai envie de l’intégrer dans ma mission mais je souhaiterais voir des cas pratiques, témoignages concrets existants dans la Collectivité.",
+      profil: "Je connais l’IA, j’ai envie de l’intégrer dans mon métier mais j’ai besoin de voir des cas pratiques et des témoignages concrets existant dans la Collectivité.",
       format: "Table ronde : l’IA dans la CeA",
       lieu: "salleB",
       page: "parcours-b"
@@ -76,7 +76,7 @@ window.FORUM = {
       resume: "Ouverture officielle du forum par Gabriel GALLAND et un·e élu·e.",
       intervenants: [
         { nom: "Gabriel GALLAND" },
-        { nom: "Élu·e", role: "à confirmer" }
+        { nom: "Un·e élu·e", role: "nom à confirmer" }
       ]
     },
     {
@@ -99,7 +99,7 @@ window.FORUM = {
       id: "parcours-a", creneau: "parcours", parcours: "A", debut: "10:10", fin: "11:00", lieu: "salleA",
       titre: "Le SAV de l’IA",
       sousTitre: "Découvrir et comprendre les principaux sujets liés à l’utilisation de l’IA générative",
-      resume: "3 situations sous format : Scène → Débat → Apport théorique, suivies d’une conclusion participative avec le public.",
+      resume: "3 mini-scènes du SAV de l’IA, chacune au format Scène → Débrief → Apport théorique, suivies d’une conclusion participative avec le public.",
       intervenants: [
         { nom: "Pierre GRAEF", role: "Animation" },
         { nom: "Emilie D", role: "IA" },
@@ -109,12 +109,18 @@ window.FORUM = {
     },
     {
       id: "parcours-b", creneau: "parcours", parcours: "B", debut: "10:10", fin: "11:00", lieu: "salleB",
-      titre: "Table ronde - l’IA dans la CeA",
+      titre: "Table ronde : l’IA dans la CeA",
       sousTitre: "Échanges avec des agents utilisant déjà l’IA dans leur métier",
-      resume: "Agent bien à l’aise avec l’IA générative pour des tâches quotidiennes (Licences Copilot) · Projet OCR Solidarités · Une IA a produit presque une de nos applications (DSIN).",
+      resume: "Un agent à l’aise avec l’IA générative pour ses tâches quotidiennes (licences Copilot) · Le projet OCR Solidarités · Coder à deux : quand l’IA devient l’assistante des développeurs de la CeA (DSIN).",
+      points: [
+        "Un agent à l’aise avec l’IA générative pour ses tâches quotidiennes (licences Copilot)",
+        "Le projet OCR Solidarités",
+        "Coder à deux : quand l’IA devient l’assistante des développeurs de la CeA (DSIN)"
+      ],
       intervenants: [
         { nom: "Hamilton DE ARAUJO", role: "Médiation" },
-        { nom: "Lucas DELAGREE" },
+        { nom: "Intervenant 1 (à définir)" },
+        { nom: "Lucas DELAGREE ou Marie COLLET" },
         { nom: "Romain WIESER" }
       ],
       livrable: "CR en format PPT généré par IA"
@@ -124,6 +130,11 @@ window.FORUM = {
       titre: "L’émission du futur",
       sousTitre: "Trois visions du service public alsacien de 2030",
       resume: "Simuler (Voir avant d’agir) · Anticiper (Agir avant que le problème n’arrive) · Augmenter (Des agents aux nouvelles capacités).",
+      points: [
+        "Simuler : voir avant d’agir",
+        "Anticiper : agir avant que le problème n’arrive",
+        "Augmenter : des agents aux nouvelles capacités"
+      ],
       intervenants: [
         { nom: "Gabriel GALLAND ou Stéphanie MENIGOZ", role: "Médiation" }
       ]
@@ -143,18 +154,22 @@ window.FORUM = {
         { numero: 5, niveau: "B", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent s’inspirer" },
         { numero: 6, niveau: "C", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent se projeter" },
         { numero: 7, niveau: "C", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent se projeter" },
-        { numero: 8, titre: "Stand Café", animateur: "", description: "Espace détente et échanges informels" }
+        { numero: 8, niveau: "A", titre: "À définir", animateur: "À confirmer", description: "Stand pour les débutants en IA" },
+        { numero: 9, niveau: "B", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent s’inspirer" },
+        { numero: 10, niveau: "C", titre: "À définir", animateur: "À confirmer", description: "Stand pour ceux qui veulent se projeter" },
+        // Stand Café : commun à tous (couleur bleue), sans numéro affiché
+        { numero: 11, cafe: true, titre: "Stand Café", animateur: "", description: "Espace détente et échanges informels, ouvert à tous." }
       ]
     },
     {
-      id: "adoptez-ia", creneau: "cloture", debut: "12:00", fin: "12:20", lieu: "pleniere",
+      id: "adoptez-ia", creneau: "cloture", debut: "12:00", fin: "12:20", lieu: "espaceHall",
       titre: "Adoptez l’IA dans votre quotidien",
       sousTitre: "Les outils et ressources de la CeA",
       resume: "Des repères concrets pour utiliser l’IA dès demain dans son travail, avec les outils et ressources disponibles au sein de la Collectivité.",
       intervenants: [{ nom: "Hamilton DE ARAUJO" }]
     },
     {
-      id: "mot-de-fin", creneau: "cloture", debut: "12:20", fin: "12:30", lieu: "pleniere",
+      id: "mot-de-fin", creneau: "cloture", debut: "12:20", fin: "12:30", lieu: "espaceHall",
       titre: "Mot de fin",
       sousTitre: "Ambition et prochaines actions en matière d’IA",
       resume: "Clôture du forum : retour sur l’ambition de la Collectivité en termes d’IA (Proximité, Efficacité, Simplicité) et présentation des prochaines actions.",

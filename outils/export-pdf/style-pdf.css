@@ -1,0 +1,131 @@
+/* Forum IA — mise en page d'impression (A4) des documents Markdown.
+   Mêmes couleurs et typographies que le site (site/assets/css/style.css). */
+
+:root {
+  --bg: #f6f4ef;
+  --surface: #fffefb;
+  --ink: #1c1b19;
+  --ink-2: #4a4843;
+  --muted: #807c73;
+  --line: #e2ddd2;
+  --accent: #9b2335;
+  --pA: #c4475b;  --pA-soft: #fbe3e6;   /* A · Je découvre : rouge clair */
+  --pB: #9a7300;  --pB-soft: #fbf1cc;   /* B · Je m'inspire : jaune */
+  --pC: #2f8a57;  --pC-soft: #ddf1e4;   /* C · Je me projette : vert */
+  --pX: #3a72c2;  --pX-soft: #e1ebf8;   /* Commun à tous : bleu */
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+@page {
+  size: A4;
+  margin: 18mm 17mm 20mm;
+  @bottom-left  { content: "__PIED__"; font: 500 7.5pt/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #807c73; }
+  @bottom-right { content: counter(page) " / " counter(pages); font: 7.5pt/1 "Inter", sans-serif; color: #807c73; }
+}
+@page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font: 9.6pt/1.55 var(--sans); color: var(--ink-2); background: #fff; }
+
+/* ---------- Couverture ---------- */
+.couverture {
+  position: relative; overflow: hidden;
+  width: 210mm; height: 297mm; padding: 20mm 20mm 18mm;
+  background: var(--bg); color: var(--ink);
+  display: flex; flex-direction: column;
+  break-after: page;
+}
+.couverture .ornement { position: absolute; right: -26mm; top: 34mm; width: 108mm; height: 108mm; opacity: .9; }
+.couverture header { display: flex; align-items: center; gap: 5mm; }
+.couverture .logo { height: 13mm; width: auto; }
+.surtitre { font: 500 7.5pt/1.3 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.surtitre.accent { color: var(--accent); }
+.titraille { margin-top: 48mm; position: relative; max-width: 130mm; }
+.couverture h1 { font: 300 66pt/0.95 var(--serif); letter-spacing: -.02em; margin: 3mm 0 0; padding: 0; border: 0; color: var(--ink); }
+.couverture h1 em { font-style: italic; color: var(--accent); }
+.couverture h1 .edition { display: block; font-size: 28pt; color: var(--muted); margin-top: 3mm; letter-spacing: 0; }
+.accroche { font: 300 13pt/1.45 var(--serif); font-style: italic; color: var(--ink-2); margin: 10mm 0 0; max-width: 112mm; }
+.infos { display: grid; grid-template-columns: auto auto 1fr; gap: 0; margin: 12mm 0 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.infos div { padding: 4mm 7mm 4mm 0; }
+.infos div + div { padding-left: 7mm; border-left: 1px solid var(--line); }
+.infos dt { font: 500 6.8pt/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.infos dd { margin: 2mm 0 0; font: 400 11.5pt/1.2 var(--serif); color: var(--ink); }
+.apercu { margin-top: auto; }
+.apercu ol { list-style: none; margin: 4mm 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.apercu li { position: relative; padding: 5mm 3mm 0 0; }
+.apercu li::before { content: ""; position: absolute; top: -1.6mm; left: 0; width: 3mm; height: 3mm; border-radius: 50%; background: var(--bg); border: 1px solid var(--ink-2); }
+.apercu .h { display: block; font: 400 12pt/1 var(--serif); color: var(--ink); }
+.apercu .t { display: block; font-size: 8pt; line-height: 1.35; margin-top: 1.5mm; color: var(--ink-2); }
+.contact { margin: 9mm 0 0; font-size: 8pt; color: var(--muted); }
+
+/* ---------- Contenu ---------- */
+.contenu > :first-child { margin-top: 0; }
+h1, h2, h3, h4 { color: var(--ink); break-after: avoid; }
+h1 {
+  font: 400 22pt/1.1 var(--serif); margin: 0 0 6mm; padding-bottom: 4mm; border-bottom: 1px solid var(--ink);
+}
+h1:not(:first-child) { break-before: page; }
+h2 { font: 400 14pt/1.25 var(--serif); margin: 9mm 0 3mm; }
+/* Créneau : heure à gauche, contenu à droite */
+section.creneau { display: grid; grid-template-columns: 26mm 1fr; padding-top: 3.5mm; margin-top: 6mm; border-top: 1px solid var(--line); break-inside: avoid; }
+section.creneau .heure { font: 500 8.5pt/1.5 var(--sans); letter-spacing: .04em; color: var(--muted); padding-top: 1mm; }
+section.creneau h2 { margin: 0 0 2.5mm; }
+section.creneau h2 + p { break-before: avoid; }
+h3 { font: 400 12pt/1.3 var(--serif); margin: 5mm 0 2mm; }
+h4 { font: 600 8pt/1.3 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2.5mm; }
+strong { color: var(--ink); font-weight: 600; }
+em { color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 6mm 0; }
+ul, ol { margin: 0 0 3mm; padding-left: 5mm; }
+li { margin: .6mm 0; }
+blockquote { margin: 0 0 3mm; padding: 0 0 0 4mm; border-left: 2px solid var(--line); font: italic 300 10.5pt/1.45 var(--serif); color: var(--ink-2); }
+blockquote p { margin: 0; }
+code { font: 8.5pt/1.4 ui-monospace, Menlo, Consolas, monospace; background: #f1eee7; padding: 0 1mm; border-radius: 1mm; }
+
+/* Tableaux */
+table { border-collapse: collapse; width: 100%; font-size: 8.8pt; margin-bottom: 4mm; break-inside: avoid; }
+th { text-align: left; font: 600 7pt/1.2 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0 3mm 1.8mm 0; border-bottom: 1px solid var(--ink-2); }
+td { padding: 2mm 3mm 2mm 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td:first-child { white-space: nowrap; }
+
+/* ---------- Niveaux : [A] [B] [C] [commun] ---------- */
+.niv-a { --c: var(--pA); --c-soft: var(--pA-soft); }
+.niv-b { --c: var(--pB); --c-soft: var(--pB-soft); }
+.niv-c { --c: var(--pC); --c-soft: var(--pC-soft); }
+.niv-commun { --c: var(--pX); --c-soft: var(--pX-soft); }
+.pastille { display: inline-block; width: 2.4mm; height: 2.4mm; border-radius: 50%; background: var(--c); margin-right: 1.8mm; vertical-align: .1mm; }
+h3[class^="niv-"], h2[class^="niv-"] { color: var(--c); }
+li[class^="niv-"] { list-style: none; position: relative; }
+li[class^="niv-"]::before { content: ""; position: absolute; left: -4.2mm; top: 1.7mm; width: 2.2mm; height: 2.2mm; border-radius: 50%; background: var(--c); }
+
+/* ---------- Blocs  ::: classe ---------- */
+.bloc { padding: 4mm 5mm 1.5mm; margin-bottom: 4mm; border-radius: 2.5mm; background: var(--c-soft, #f1eee7); border-left: 2.5px solid var(--c, var(--line)); break-inside: avoid; }
+.bloc > :first-child { margin-top: 0; }
+.bloc h3 { color: var(--c, var(--ink)); }
+.bloc table { width: 100%; }
+.bloc.a, .bloc.parcours-a { --c: var(--pA); --c-soft: var(--pA-soft); }
+.bloc.b, .bloc.parcours-b { --c: var(--pB); --c-soft: var(--pB-soft); }
+.bloc.c, .bloc.parcours-c { --c: var(--pC); --c-soft: var(--pC-soft); }
+.bloc.commun { --c: var(--pX); --c-soft: var(--pX-soft); }
+.bloc.note { --c: var(--ink-2); --c-soft: #f1eee7; }
+.bloc.parcours-a h3, .bloc.parcours-b h3, .bloc.parcours-c h3 { margin-top: 0; }
+
+/* Trois parcours côte à côte :  ::: colonnes  … (blocs parcours) …  ::: */
+.bloc.colonnes { background: none; border: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; break-inside: auto;
+  margin-left: -26mm; margin-top: 5mm; }
+/* Un créneau qui contient des colonnes commence sur une nouvelle page */
+section.creneau:has(.colonnes) { break-before: page; border-top: 0; margin-top: 0; }
+.bloc.colonnes > .bloc { margin: 0; font-size: 8.6pt; }
+.bloc.colonnes > .bloc h3 { font-size: 11pt; }
+.bloc.colonnes > .bloc h4 { margin-top: 3mm; }
+
+/* Grille de stands :  ::: stands  - [A] **01** Thème …  ::: */
+.bloc.stands { background: none; border: 0; padding: 0; }
+.bloc.stands ul { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; }
+.bloc.stands li { margin: 0; padding: 2.6mm 3mm; background: #fff; border: 1px solid var(--line); border-top: 2.5px solid var(--c, var(--line)); border-radius: 2mm; font-size: 8pt; line-height: 1.35; }
+.bloc.stands li::before { display: none; }
+.bloc.stands li strong:first-child { display: block; font: italic 400 14pt/1 var(--serif); color: var(--c, var(--ink)); margin-bottom: 1.2mm; }
